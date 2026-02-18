@@ -44,7 +44,7 @@ export async function GET(
       );
     }
 
-    const post = serializeTimestamps(postDoc.data() as Record<string, unknown>) as CommunityPost;
+    const post = serializeTimestamps(postDoc.data() as Record<string, unknown>) as unknown as CommunityPost;
 
     // Get comments (sort in memory to avoid composite index requirement)
     const commentsSnapshot = await adminDb
@@ -54,7 +54,7 @@ export async function GET(
 
     const comments = commentsSnapshot.docs
       .map(doc => {
-        const c = serializeTimestamps(doc.data() as Record<string, unknown>) as CommunityComment;
+        const c = serializeTimestamps(doc.data() as Record<string, unknown>) as unknown as CommunityComment;
         return {
           ...c,
           liked: userId ? (c.likedBy || []).includes(userId) : false,
@@ -80,7 +80,7 @@ export async function GET(
         .get();
 
       relatedPosts = relatedSnapshot.docs
-        .map(d => serializeTimestamps(d.data() as Record<string, unknown>) as CommunityPost)
+        .map(d => serializeTimestamps(d.data() as Record<string, unknown>) as unknown as CommunityPost)
         .filter(p => p.id !== postId && p.tags.some(t => post.tags.includes(t)))
         .slice(0, 3)
         .map(p => ({ id: p.id, title: p.title, commentsCount: p.commentsCount }));

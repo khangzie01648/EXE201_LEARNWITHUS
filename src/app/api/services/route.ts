@@ -150,7 +150,7 @@ export async function POST(request: NextRequest) {
         price: priceInfo.price,
         collectionMethod: priceInfo.collectionMethod,
         effectiveFrom: new Date(),
-        effectiveTo: null
+        effectiveTo: undefined
       };
       await createDocument(COLLECTIONS.servicePrices, priceData);
     }

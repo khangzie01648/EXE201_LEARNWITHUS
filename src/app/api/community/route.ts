@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
     query = query.limit(limit);
 
     const snapshot = await query.get();
-    let posts = snapshot.docs.map(doc => serializeTimestamps(doc.data() as Record<string, unknown>) as CommunityPost);
+    let posts = snapshot.docs.map(doc => serializeTimestamps(doc.data() as Record<string, unknown>) as unknown as CommunityPost);
 
     // Client-side tag filter (Firestore doesn't support array-contains + orderBy on different fields well)
     if (tag) {

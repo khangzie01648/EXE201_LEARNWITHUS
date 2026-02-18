@@ -16,6 +16,15 @@ import {
   Eye,
 } from 'lucide-react';
 
+const GROUPS = [
+  { id: '', name: 'Tất cả (không chọn nhóm)' },
+  { id: 'g1', name: 'Giải tích 1 - Nhóm 7' },
+  { id: 'g2', name: 'Lập trình Web K21' },
+  { id: 'g3', name: 'AI cơ bản - K20' },
+  { id: 'g4', name: 'CSDL nâng cao' },
+  { id: 'g5', name: 'IELTS 6.5+ Club' },
+];
+
 const SUGGESTED_TAGS = [
   'Toán', 'Lập trình', 'AI', 'CSDL', 'Tiếng Anh', 'Ôn thi',
   'Chia sẻ', 'Hỏi đáp', 'Tìm nhóm', 'Kinh nghiệm',

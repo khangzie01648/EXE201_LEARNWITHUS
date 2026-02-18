@@ -157,7 +157,7 @@ export async function POST(request: NextRequest) {
       price,
       collectionMethod,
       effectiveFrom: effectiveFrom ? new Date(effectiveFrom) : new Date(),
-      effectiveTo: effectiveTo ? new Date(effectiveTo) : null
+      effectiveTo: effectiveTo ? new Date(effectiveTo) : undefined
     };
 
     const priceId = await createDocument(COLLECTIONS.servicePrices, priceData);

@@ -296,6 +296,7 @@ export interface StudyGroup extends BaseEntity {
   isPrivate: boolean;
   createdBy: string;
   membersCount: number;
+  rules?: string[];
 }
 
 // Group Member
