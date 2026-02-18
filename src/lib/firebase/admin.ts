@@ -3,51 +3,66 @@
 
 import admin from 'firebase-admin';
 import { getApps } from 'firebase-admin/app';
-import path from 'path';
-import fs from 'fs';
 
-// Initialize Firebase Admin (prevent duplicate initialization)
-if (!getApps().length) {
+function initializeFirebaseAdmin() {
+  if (getApps().length) return;
+
   try {
-    // Get the absolute path to serviceAccountKey.json in the project root
+    // Try serviceAccountKey.json first (local dev)
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const fs = require('fs');
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const path = require('path');
     const serviceAccountPath = path.join(process.cwd(), 'serviceAccountKey.json');
-    
-    // Check if file exists
+
     if (fs.existsSync(serviceAccountPath)) {
-      const serviceAccountContent = fs.readFileSync(serviceAccountPath, 'utf8');
-      const serviceAccount = JSON.parse(serviceAccountContent);
-      
+      const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
       admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
         storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
       });
-      
       console.log('✅ Firebase Admin initialized successfully');
-    } else {
-      // Fallback: Use environment variables
-      const serviceAccount = {
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-      };
-      
-      admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
-        storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-      });
-      
-      console.log('✅ Firebase Admin initialized with env variables');
+      return;
     }
-  } catch (error) {
-    console.error('❌ Firebase Admin initialization error:', error);
-    throw new Error('Failed to initialize Firebase Admin. Check serviceAccountKey.json or environment variables.');
+  } catch {
+    // serviceAccountKey.json not available, try env vars
   }
+
+  // Fallback: Use environment variables (Vercel / production)
+  const projectId = process.env.FIREBASE_PROJECT_ID;
+  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+  const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+
+  if (!projectId || !clientEmail || !privateKey) {
+    console.warn('⚠ Firebase Admin: missing env vars, skipping initialization (build-time is OK)');
+    return;
+  }
+
+  admin.initializeApp({
+    credential: admin.credential.cert({ projectId, clientEmail, privateKey } as admin.ServiceAccount),
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  });
+  console.log('✅ Firebase Admin initialized with env variables');
 }
 
-// Firebase Admin services
-export const adminDb = admin.firestore();
-export const adminAuth = admin.auth();
-export const adminStorage = admin.storage();
+function getFirebaseAdmin() {
+  initializeFirebaseAdmin();
+  if (!getApps().length) {
+    throw new Error('Firebase Admin not initialized. Set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY.');
+  }
+  return admin;
+}
+
+// Lazy getters - only initialize when actually called at runtime
+export const adminDb = new Proxy({} as FirebaseFirestore.Firestore, {
+  get(_, prop) { return Reflect.get(getFirebaseAdmin().firestore(), prop); },
+});
+export const adminAuth = new Proxy({} as admin.auth.Auth, {
+  get(_, prop) { return Reflect.get(getFirebaseAdmin().auth(), prop); },
+});
+export const adminStorage = new Proxy({} as admin.storage.Storage, {
+  get(_, prop) { return Reflect.get(getFirebaseAdmin().storage(), prop); },
+});
 
 // Firestore Collections
 export const COLLECTIONS = {
