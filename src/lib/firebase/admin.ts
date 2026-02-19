@@ -11,10 +11,16 @@ function initializeFirebaseAdmin() {
   const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT;
   if (serviceAccountJson) {
     try {
-      const serviceAccount = JSON.parse(serviceAccountJson) as admin.ServiceAccount;
-      if (serviceAccount.project_id && serviceAccount.private_key && serviceAccount.client_email) {
-        admin.initializeApp({  
-          credential: admin.credential.cert(serviceAccount),
+      const parsed = JSON.parse(serviceAccountJson) as admin.ServiceAccount & { project_id?: string; private_key?: string; client_email?: string };
+      const projectId = parsed.project_id ?? parsed.projectId;
+      let privateKey = parsed.private_key ?? parsed.privateKey;
+      const clientEmail = parsed.client_email ?? parsed.clientEmail;
+      if (projectId && privateKey && clientEmail) {
+        if (typeof privateKey === 'string' && privateKey.includes('\\n')) {
+          privateKey = privateKey.replace(/\\n/g, '\n');
+        }
+        admin.initializeApp({
+          credential: admin.credential.cert({ projectId, clientEmail, privateKey } as admin.ServiceAccount),
           storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
         });
         console.log('✅ Firebase Admin initialized (FIREBASE_SERVICE_ACCOUNT)');
@@ -25,25 +31,27 @@ function initializeFirebaseAdmin() {
     }
   }
 
-  // 2. serviceAccountKey.json (local dev)
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const fs = require('fs');
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const path = require('path');
-    const serviceAccountPath = path.join(process.cwd(), 'serviceAccountKey.json');
+  // 2. serviceAccountKey.json (local dev only - skip on Vercel)
+  if (typeof process.env.VERCEL === 'undefined') {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const fs = require('fs');
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const path = require('path');
+      const serviceAccountPath = path.join(process.cwd(), 'serviceAccountKey.json');
 
-    if (fs.existsSync(serviceAccountPath)) {
-      const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
-      admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-        storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-      });
-      console.log('✅ Firebase Admin initialized (serviceAccountKey.json)');
-      return;
+      if (fs.existsSync(serviceAccountPath)) {
+        const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
+        admin.initializeApp({
+          credential: admin.credential.cert(serviceAccount),
+          storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+        });
+        console.log('✅ Firebase Admin initialized (serviceAccountKey.json)');
+        return;
+      }
+    } catch {
+      // serviceAccountKey.json not available
     }
-  } catch {
-    // serviceAccountKey.json not available
   }
 
   // 3. Individual env vars (FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY)
