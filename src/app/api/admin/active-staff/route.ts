@@ -10,7 +10,8 @@ const roleNames: Record<UserRole, string> = {
   [UserRole.Admin]: 'Admin',
   [UserRole.Staff]: 'Staff',
   [UserRole.Client]: 'Client',
-  [UserRole.Manager]: 'Manager'
+  [UserRole.Manager]: 'Manager',
+  [UserRole.Mentor]: 'Mentor'
 };
 
 // DTO for staff list

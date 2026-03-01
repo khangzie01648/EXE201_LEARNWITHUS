@@ -14,6 +14,7 @@ interface ProfileResponse {
   email: string;
   phone: string;
   address: string;
+  avatarUrl?: string;
   role: number;
   isActive: boolean;
   createdAt: string;
@@ -69,6 +70,7 @@ export async function GET(request: NextRequest) {
       email: user.email,
       phone: user.phone || '',
       address: user.address || '',
+      avatarUrl: user.avatarUrl,
       role: typeof user.role === 'number' ? user.role : 2,
       isActive: user.isActive,
       createdAt: user.createdAt instanceof Object && 'toDate' in user.createdAt

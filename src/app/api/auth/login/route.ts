@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate JWT token
-    const roleNames = ['Admin', 'Staff', 'Client', 'Manager'];
+    const roleNames = ['Admin', 'Staff', 'Client', 'Manager', 'Mentor'];
     const resolveRoleName = (roleValue: unknown): string => {
       if (typeof roleValue === 'number' && roleNames[roleValue]) {
         return roleNames[roleValue];

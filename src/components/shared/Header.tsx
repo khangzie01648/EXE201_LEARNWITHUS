@@ -153,14 +153,25 @@ export default function Header() {
                         <Users size={18} />
                         Không gian học
                       </Link>
-                      <Link
-                        href="/mentor/dashboard"
-                        onClick={() => setIsAvatarOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-slate-50 hover:text-slate-700 transition-colors"
-                      >
-                        <BookOpen size={18} />
-                        Dashboard Mentor
-                      </Link>
+                      {userInfo.role === 'Mentor' ? (
+                        <Link
+                          href="/mentor/dashboard"
+                          onClick={() => setIsAvatarOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-slate-50 hover:text-slate-700 transition-colors"
+                        >
+                          <BookOpen size={18} />
+                          Dashboard Mentor
+                        </Link>
+                      ) : (
+                        <Link
+                          href="/mentor/register"
+                          onClick={() => setIsAvatarOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-slate-50 hover:text-slate-700 transition-colors"
+                        >
+                          <BookOpen size={18} />
+                          Đăng ký Mentor
+                        </Link>
+                      )}
                       <Link
                         href="/upgrade"
                         onClick={() => setIsAvatarOpen(false)}

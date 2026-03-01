@@ -75,11 +75,11 @@ function ConfirmModal({
           {/* Icon */}
           <div className={`inline-flex items-center justify-center w-16 h-16 mb-4 rounded-2xl ${
             variant === 'join'
-              ? 'bg-gradient-to-br from-violet-100 to-pink-100'
+              ? 'bg-gradient-to-br from-slate-100 to-slate-200'
               : 'bg-gradient-to-br from-red-100 to-orange-100'
           }`}>
             {variant === 'join' ? (
-              <Users size={28} className="text-violet-600" />
+              <Users size={28} className="text-slate-600" />
             ) : (
               <AlertTriangle size={28} className="text-red-500" />
             )}
@@ -103,7 +103,7 @@ function ConfirmModal({
               disabled={loading}
               className={`flex-1 px-4 py-2.5 text-sm font-semibold text-white rounded-xl transition-all hover:shadow-lg disabled:opacity-70 ${
                 variant === 'join'
-                  ? 'bg-gradient-to-r from-violet-500 to-pink-500 hover:shadow-violet-200'
+                  ? 'bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 hover:shadow-slate-200'
                   : 'bg-gradient-to-r from-red-500 to-orange-500 hover:shadow-red-200'
               }`}
             >
@@ -284,7 +284,7 @@ function GroupCard({
         return (
           <button
             onClick={handleJoinClick}
-            className="px-4 py-1.5 text-xs font-semibold text-white bg-gradient-to-r from-violet-500 to-pink-500 rounded-lg hover:shadow-md transition-all"
+            className="px-4 py-1.5 text-xs font-semibold text-white bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 rounded-lg hover:shadow-md transition-all"
           >
             Tham gia
           </button>
@@ -295,7 +295,7 @@ function GroupCard({
   return (
     <>
       <Link href={`/groups/${group.id}`} className="block group">
-        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg hover:border-violet-200 transition-all">
+        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg hover:border-slate-200 transition-all">
           {/* Cover */}
           <div className={`h-28 bg-gradient-to-r ${group.coverColor} relative`}>
             <div className="absolute inset-0 bg-black/10" />
@@ -314,7 +314,7 @@ function GroupCard({
 
           {/* Info */}
           <div className="p-4">
-            <h3 className="text-base font-semibold text-gray-800 group-hover:text-violet-600 transition-colors line-clamp-1">
+            <h3 className="text-base font-semibold text-gray-800 group-hover:text-slate-600 transition-colors line-clamp-1">
               {group.name}
             </h3>
             <p className="mt-1 text-sm text-gray-500 line-clamp-1">{group.description}</p>
@@ -324,7 +324,7 @@ function GroupCard({
               {(group.subjectTags || []).map((tag) => (
                 <span
                   key={tag}
-                  className="px-2 py-0.5 text-xs font-medium text-violet-600 bg-violet-50 rounded-full"
+                  className="px-2 py-0.5 text-xs font-medium text-slate-600 bg-slate-50 rounded-full"
                 >
                   {tag}
                 </span>
@@ -440,7 +440,7 @@ export default function GroupsPage() {
           </div>
           <Link
             href="/groups/create"
-            className="flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-gradient-to-r from-violet-500 to-pink-500 rounded-xl shadow-lg shadow-violet-200 hover:shadow-xl hover:shadow-pink-200 hover:-translate-y-0.5 transition-all"
+            className="flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 rounded-xl shadow-lg shadow-slate-200 hover:shadow-xl hover:shadow-slate-300 hover:-translate-y-0.5 transition-all"
           >
             <Plus size={18} />
             Tạo nhóm mới
@@ -455,7 +455,7 @@ export default function GroupsPage() {
             placeholder="Tìm nhóm theo môn hoặc tên lớp..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full py-3 pl-11 pr-4 text-sm bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
+            className="w-full py-3 pl-11 pr-4 text-sm bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all"
           />
         </div>
 
@@ -469,8 +469,8 @@ export default function GroupsPage() {
                 onClick={() => setActiveSubject(subject)}
                 className={`px-3.5 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition-all ${
                   activeSubject === subject
-                    ? 'bg-gradient-to-r from-violet-500 to-pink-500 text-white shadow-md'
-                    : 'bg-white text-gray-600 border border-gray-200 hover:border-violet-300 hover:text-violet-600'
+                    ? 'bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 text-white shadow-md'
+                    : 'bg-white text-gray-600 border border-gray-200 hover:border-slate-300 hover:text-slate-600'
                 }`}
               >
                 {subject}
@@ -485,7 +485,7 @@ export default function GroupsPage() {
               <select
                 value={privacyFilter}
                 onChange={(e) => setPrivacyFilter(e.target.value as PrivacyFilter)}
-                className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
+                className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500"
               >
                 <option value="all">Tất cả</option>
                 <option value="public">Công khai</option>
@@ -495,7 +495,7 @@ export default function GroupsPage() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as SortOption)}
-              className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
+              className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500"
             >
               <option value="popular">Phổ biến</option>
               <option value="new">Mới nhất</option>
@@ -510,7 +510,7 @@ export default function GroupsPage() {
           <div className="flex-1 min-w-0">
             {loading ? (
               <div className="py-16 text-center bg-white rounded-2xl border border-gray-100">
-                <Loader2 size={48} className="mx-auto mb-4 text-violet-400 animate-spin" />
+                <Loader2 size={48} className="mx-auto mb-4 text-slate-400 animate-spin" />
                 <p className="text-gray-500">Đang tải danh sách nhóm...</p>
               </div>
             ) : sortedGroups.length === 0 ? (
@@ -537,13 +537,13 @@ export default function GroupsPage() {
             {/* Trending Tags */}
             <div className="p-5 bg-white rounded-2xl border border-gray-100">
               <h3 className="flex items-center gap-2 mb-4 text-sm font-semibold text-gray-800">
-                <TrendingUp size={16} className="text-violet-600" />
+                <TrendingUp size={16} className="text-slate-600" />
                 Tags thịnh hành
               </h3>
               <div className="space-y-3">
                 {TRENDING_TAGS.map((tag) => (
                   <div key={tag.name} className="flex items-center justify-between cursor-pointer group">
-                    <span className="text-sm text-gray-700 group-hover:text-violet-600 transition-colors">
+                    <span className="text-sm text-gray-700 group-hover:text-slate-600 transition-colors">
                       #{tag.name}
                     </span>
                     <span className="text-xs text-gray-400">{tag.count} nhóm</span>
@@ -553,7 +553,7 @@ export default function GroupsPage() {
             </div>
 
             {/* CTA */}
-            <div className="p-5 bg-gradient-to-br from-violet-500 to-pink-500 rounded-2xl text-white">
+            <div className="p-5 bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 rounded-2xl text-white">
               <div className="flex items-center gap-2 mb-2">
                 <Flame size={18} className="text-amber-300" />
                 <h3 className="font-semibold">Tạo nhóm riêng</h3>
@@ -563,7 +563,7 @@ export default function GroupsPage() {
               </p>
               <Link
                 href="/groups/create"
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-violet-600 bg-white rounded-xl hover:shadow-lg transition-all"
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-700 bg-white rounded-xl hover:shadow-lg transition-all"
               >
                 <Plus size={16} />
                 Tạo nhóm ngay

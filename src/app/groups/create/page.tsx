@@ -73,14 +73,14 @@ export default function CreateGroupPage() {
     setLoading(true);
     try {
       const COVER_COLORS = [
-        'from-violet-500 to-purple-600',
-        'from-pink-500 to-rose-600',
+        'from-slate-800 via-slate-900 to-slate-950',
+        'from-slate-700 via-slate-800 to-slate-900',
         'from-emerald-500 to-teal-600',
         'from-amber-500 to-orange-600',
         'from-indigo-500 to-blue-600',
         'from-cyan-500 to-blue-600',
-        'from-rose-500 to-pink-600',
-        'from-fuchsia-500 to-purple-600',
+        'from-slate-600 to-slate-800',
+        'from-slate-700 to-slate-900',
       ];
       const randomColor = COVER_COLORS[Math.floor(Math.random() * COVER_COLORS.length)];
 
@@ -134,7 +134,7 @@ export default function CreateGroupPage() {
             disabled={!canSubmit || loading}
             className={`flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-xl transition-all ${
               canSubmit && !loading
-                ? 'text-white bg-gradient-to-r from-violet-500 to-pink-500 shadow-lg shadow-violet-200 hover:shadow-xl hover:-translate-y-0.5'
+                ? 'text-white bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 shadow-lg shadow-slate-200 hover:shadow-xl hover:-translate-y-0.5'
                 : 'text-gray-400 bg-gray-100 cursor-not-allowed'
             }`}
           >
@@ -168,7 +168,7 @@ export default function CreateGroupPage() {
                 setName(e.target.value);
                 setErrors({});
               }}
-              className={`w-full px-4 py-3 text-sm border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all ${
+              className={`w-full px-4 py-3 text-sm border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all ${
                 errors.name ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-gray-50'
               }`}
             />
@@ -187,7 +187,7 @@ export default function CreateGroupPage() {
               {tags.map((tag) => (
                 <span
                   key={tag}
-                  className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-violet-600 bg-violet-50 rounded-full"
+                  className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-50 rounded-full"
                 >
                   {tag}
                   <button onClick={() => removeTag(tag)} className="hover:text-red-500 transition-colors">
@@ -203,7 +203,7 @@ export default function CreateGroupPage() {
               onChange={(e) => setTagInput(e.target.value)}
               onKeyDown={handleTagKeyDown}
               disabled={tags.length >= 5}
-              className="w-full px-4 py-2.5 text-sm bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 text-sm bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all"
             />
             {/* Suggested */}
             <div className="flex flex-wrap gap-1.5 mt-2">
@@ -214,7 +214,7 @@ export default function CreateGroupPage() {
                     key={tag}
                     type="button"
                     onClick={() => addTag(tag)}
-                    className="px-2.5 py-1 text-xs text-gray-500 bg-gray-100 rounded-full hover:bg-violet-50 hover:text-violet-600 transition-all"
+                    className="px-2.5 py-1 text-xs text-gray-500 bg-gray-100 rounded-full hover:bg-slate-50 hover:text-slate-600 transition-all"
                   >
                     +{tag}
                   </button>
@@ -232,7 +232,7 @@ export default function CreateGroupPage() {
               value={description}
               onChange={(e) => setDescription(e.target.value.slice(0, 200))}
               rows={3}
-              className="w-full px-4 py-3 text-sm bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent resize-none transition-all"
+              className="w-full px-4 py-3 text-sm bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent resize-none transition-all"
               maxLength={200}
             />
             <p className="mt-1 text-xs text-gray-400 text-right">{description.length}/200</p>
@@ -285,7 +285,7 @@ export default function CreateGroupPage() {
             </label>
             <button
               type="button"
-              className="flex items-center gap-2 w-full px-4 py-8 text-sm font-medium text-violet-600 border-2 border-dashed border-violet-300 rounded-xl hover:bg-violet-50 transition-all"
+              className="flex items-center gap-2 w-full px-4 py-8 text-sm font-medium text-slate-600 border-2 border-dashed border-slate-300 rounded-xl hover:bg-slate-50 transition-all"
             >
               <ImagePlus size={20} />
               Tải lên ảnh bìa (tỉ lệ 16:6)
@@ -303,7 +303,7 @@ export default function CreateGroupPage() {
               placeholder="Nhập email hoặc tên bạn bè, cách nhau bởi dấu phẩy"
               value={inviteEmails}
               onChange={(e) => setInviteEmails(e.target.value)}
-              className="w-full px-4 py-2.5 text-sm bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 text-sm bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all"
             />
             <p className="mt-1 text-xs text-gray-400">
               Lời mời sẽ được gửi qua email sau khi tạo nhóm

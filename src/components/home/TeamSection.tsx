@@ -44,7 +44,7 @@ export default function TeamSection() {
           {team.map((member, index) => (
             <div
               key={index}
-              className="text-center p-6 rounded-2xl border border-pink-100 bg-gradient-to-br from-violet-50/50 to-pink-50/50 hover:shadow-lg transition-all hover:-translate-y-1"
+              className="text-center p-6 rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50/80 to-slate-100/80 hover:shadow-lg transition-all hover:-translate-y-1"
             >
               <div className="relative w-24 h-24 mx-auto mb-4 overflow-hidden rounded-2xl ring-4 ring-slate-200 md:w-28 md:h-28">
                 <Image

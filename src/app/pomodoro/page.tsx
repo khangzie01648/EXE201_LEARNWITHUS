@@ -115,10 +115,10 @@ export default function PomodoroPage() {
     switch (mode) {
       case 'focus':
         return {
-          bg: 'from-violet-500 via-fuchsia-500 to-pink-500',
-          ring: 'stroke-violet-500',
-          button: 'from-violet-500 to-pink-500',
-          light: 'from-violet-100 to-pink-100',
+          bg: 'from-slate-800 via-slate-900 to-slate-950',
+          ring: 'stroke-slate-600',
+          button: 'from-slate-800 via-slate-900 to-slate-950',
+          light: 'from-slate-100 to-slate-200',
         };
       case 'shortBreak':
         return {
@@ -248,14 +248,14 @@ export default function PomodoroPage() {
 
         {/* Info Cards */}
         <div className="grid gap-4 sm:grid-cols-3">
-          <div className="p-6 bg-white rounded-2xl shadow-lg border border-violet-100">
+          <div className="p-6 bg-white rounded-2xl shadow-lg border border-slate-200">
             <div className="flex items-center gap-3 mb-3">
-              <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-violet-100">
-                <Target size={20} className="text-violet-600" />
+              <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100">
+                <Target size={20} className="text-slate-600" />
               </div>
               <h3 className="font-semibold text-gray-800">Mục tiêu hôm nay</h3>
             </div>
-            <p className="text-3xl font-bold text-violet-600">{completedSessions} / 8</p>
+            <p className="text-3xl font-bold text-slate-600">{completedSessions} / 8</p>
             <p className="mt-1 text-sm text-gray-500">phiên tập trung</p>
           </div>
 
@@ -285,14 +285,14 @@ export default function PomodoroPage() {
         </div>
 
         {/* Tips Section */}
-        <div className="mt-8 p-6 bg-white/80 backdrop-blur-sm rounded-2xl border border-violet-100">
+        <div className="mt-8 p-6 bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200">
           <h3 className="flex items-center gap-2 mb-4 text-lg font-semibold text-gray-800">
             <Sparkles size={20} className="text-amber-500" />
             Mẹo học hiệu quả với Pomodoro
           </h3>
           <ul className="space-y-2 text-gray-600">
             <li className="flex items-start gap-2">
-              <span className="text-violet-500">•</span>
+              <span className="text-slate-500">•</span>
               <span><strong>25 phút tập trung</strong> - Tắt thông báo, tập trung hoàn toàn vào công việc</span>
             </li>
             <li className="flex items-start gap-2">

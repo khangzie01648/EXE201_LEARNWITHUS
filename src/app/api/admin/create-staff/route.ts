@@ -126,7 +126,8 @@ export async function POST(request: NextRequest) {
       [UserRole.Admin]: 'Admin',
       [UserRole.Staff]: 'Nhân viên',
       [UserRole.Client]: 'Khách hàng',
-      [UserRole.Manager]: 'Quản lý'
+      [UserRole.Manager]: 'Quản lý',
+      [UserRole.Mentor]: 'Mentor'
     };
 
     return NextResponse.json<ApiResponse<{ userId: string; role: string }>>(

@@ -54,10 +54,33 @@ export default function MentorRegisterPage() {
       return;
     }
 
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    if (!token) {
+      setError('Vui lòng đăng nhập để đăng ký làm Mentor');
+      return;
+    }
+
     setLoading(true);
     try {
-      await new Promise((r) => setTimeout(r, 1200));
-      setSuccess(true);
+      const res = await fetch('/api/mentor', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fullName: formData.fullName.trim(),
+          email: formData.email.trim(),
+          subject: formData.subject,
+          goal: formData.bio || formData.experience || '',
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setSuccess(true);
+      } else {
+        setError(data.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
+      }
     } catch {
       setError('Có lỗi xảy ra. Vui lòng thử lại.');
     } finally {
@@ -80,7 +103,7 @@ export default function MentorRegisterPage() {
             </p>
             <Link
               href="/mentors"
-              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-violet-600 px-6 py-3 font-semibold text-white transition-all hover:bg-violet-700"
+              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 px-6 py-3 font-semibold text-white transition-all hover:opacity-90"
             >
               Xem danh sách Mentor
             </Link>
@@ -98,7 +121,7 @@ export default function MentorRegisterPage() {
       <main className="px-4 py-12 mx-auto max-w-5xl sm:px-6 lg:px-8">
         {/* Hero */}
         <section className="mb-12 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 mb-4 text-sm font-medium text-violet-700 bg-violet-100 rounded-full">
+          <div className="inline-flex items-center gap-2 px-4 py-2 mb-4 text-sm font-medium text-slate-700 bg-slate-100 rounded-full">
             <Sparkles size={16} className="text-amber-500" />
             Trở thành Mentor
           </div>
@@ -118,15 +141,15 @@ export default function MentorRegisterPage() {
               <ul className="mt-4 space-y-4">
                 {benefits.map((item) => (
                   <li key={item.text} className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-100">
-                      <item.icon size={20} className="text-violet-600" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100">
+                      <item.icon size={20} className="text-slate-600" />
                     </div>
                     <span className="text-sm text-gray-700">{item.text}</span>
                   </li>
                 ))}
               </ul>
             </div>
-            <div className="rounded-2xl bg-gradient-to-br from-violet-600 to-pink-600 p-6 text-white">
+            <div className="rounded-2xl bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 p-6 text-white">
               <h3 className="font-semibold">Quy trình duyệt</h3>
               <ol className="mt-4 space-y-2 text-sm text-white/90">
                 <li>1. Gửi đơn đăng ký</li>
@@ -153,7 +176,7 @@ export default function MentorRegisterPage() {
                     type="text"
                     value={formData.fullName}
                     onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
                     placeholder="Nguyễn Văn A"
                   />
                 </div>
@@ -166,7 +189,7 @@ export default function MentorRegisterPage() {
                       type="email"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                      className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
                       placeholder="email@edu.vn"
                     />
                   </div>
@@ -178,7 +201,7 @@ export default function MentorRegisterPage() {
                       type="tel"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                      className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
                       placeholder="0912345678"
                     />
                   </div>
@@ -190,7 +213,7 @@ export default function MentorRegisterPage() {
                   <select
                     value={formData.subject}
                     onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
                   >
                     <option value="">Chọn môn học</option>
                     {subjectOptions.map((s) => (
@@ -206,7 +229,7 @@ export default function MentorRegisterPage() {
                     type="text"
                     value={formData.experience}
                     onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
-                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
                     placeholder="VD: 5 năm"
                   />
                 </div>
@@ -218,7 +241,7 @@ export default function MentorRegisterPage() {
                     type="text"
                     value={formData.availability}
                     onChange={(e) => setFormData({ ...formData, availability: e.target.value })}
-                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
                     placeholder="VD: T2, T4, T6 tối 19h-21h"
                   />
                 </div>
@@ -230,7 +253,7 @@ export default function MentorRegisterPage() {
                     type="number"
                     value={formData.pricePerSession}
                     onChange={(e) => setFormData({ ...formData, pricePerSession: e.target.value })}
-                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
                     placeholder="VD: 150000"
                   />
                 </div>
@@ -242,7 +265,7 @@ export default function MentorRegisterPage() {
                     value={formData.bio}
                     onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                     rows={4}
-                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-violet-500"
+                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-slate-500"
                     placeholder="Mô tả kinh nghiệm, chuyên môn, phong cách dạy..."
                   />
                 </div>
@@ -253,7 +276,7 @@ export default function MentorRegisterPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-pink-500 py-3 font-semibold text-white shadow-lg transition-all hover:shadow-xl disabled:opacity-70"
+                className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 py-3 font-semibold text-white shadow-lg transition-all hover:shadow-xl disabled:opacity-70"
               >
                 {loading ? (
                   <>

@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Header, Footer } from '@/components/shared';
 import {
   BookOpen,
   Calendar,
+  Camera,
   CheckCircle,
   Edit3,
   Flame,
@@ -34,6 +35,7 @@ interface UserProfile {
   email: string;
   phone: string;
   address: string;
+  avatarUrl?: string;
   role: number;
   isActive: boolean;
   createdAt: string;
@@ -97,6 +99,10 @@ export default function ProfilePage() {
 
   // Joined groups
   const [joinedGroups, setJoinedGroups] = useState<JoinedGroup[]>([]);
+
+  // Avatar upload
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   const getToken = (): string | null => localStorage.getItem('token');
 
@@ -259,6 +265,55 @@ export default function ProfilePage() {
     }
   };
 
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !profile) return;
+
+    const token = getToken();
+    if (!token) {
+      router.push('/login');
+      return;
+    }
+
+    const allowed = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!allowed.includes(file.type)) {
+      alert('Chỉ chấp nhận ảnh JPEG, PNG hoặc WebP');
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      alert('Ảnh không được vượt quá 2MB');
+      return;
+    }
+
+    setAvatarUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/auth/profile/avatar', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.data?.avatarUrl) {
+        setProfile(prev => prev ? { ...prev, avatarUrl: data.data.avatarUrl } : null);
+        setSuccessMessage('Cập nhật ảnh đại diện thành công!');
+        setShowSuccess(true);
+        setTimeout(() => setShowSuccess(false), 3000);
+      } else {
+        alert(data.message || 'Có lỗi xảy ra');
+      }
+    } catch {
+      alert('Lỗi kết nối. Vui lòng thử lại.');
+    } finally {
+      setAvatarUploading(false);
+      e.target.value = '';
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -287,7 +342,7 @@ export default function ProfilePage() {
         );
       case 'moderator':
         return (
-          <span className="flex items-center gap-1 px-2 py-0.5 text-xs font-semibold text-violet-700 bg-violet-100 rounded-full">
+          <span className="flex items-center gap-1 px-2 py-0.5 text-xs font-semibold text-slate-700 bg-slate-100 rounded-full">
             <Shield size={10} /> Mod
           </span>
         );
@@ -307,7 +362,7 @@ export default function ProfilePage() {
         <Header />
         <div className="flex items-center justify-center py-32">
           <div className="text-center">
-            <Loader2 size={48} className="mx-auto mb-4 text-violet-400 animate-spin" />
+            <Loader2 size={48} className="mx-auto mb-4 text-slate-400 animate-spin" />
             <p className="text-gray-500">Đang tải thông tin...</p>
           </div>
         </div>
@@ -326,7 +381,7 @@ export default function ProfilePage() {
             <p className="text-gray-500 font-medium">Không tìm thấy thông tin</p>
             <Link
               href="/login"
-              className="mt-4 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-violet-600 bg-violet-50 rounded-xl hover:bg-violet-100 transition-colors"
+              className="mt-4 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors"
             >
               Đăng nhập
             </Link>
@@ -344,10 +399,10 @@ export default function ProfilePage() {
 
       <main>
         {/* Profile Banner */}
-        <div className="relative h-40 sm:h-48 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500">
+        <div className="relative h-40 sm:h-48 bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950">
           <div className="absolute inset-0 bg-black/10" />
           <div className="absolute w-40 h-40 rounded-full top-4 right-12 bg-white/10 blur-3xl" />
-          <div className="absolute w-28 h-28 rounded-full bottom-2 left-20 bg-pink-400/20 blur-2xl" />
+          <div className="absolute w-28 h-28 rounded-full bottom-2 left-20 bg-slate-400/20 blur-2xl" />
         </div>
 
         <div className="px-4 mx-auto max-w-5xl sm:px-6 lg:px-8">
@@ -355,13 +410,41 @@ export default function ProfilePage() {
           <div className="relative -mt-14 mb-8">
             <div className="flex flex-col sm:flex-row sm:items-end gap-4">
               {/* Avatar */}
-              <div className="flex items-center justify-center w-28 h-28 rounded-2xl bg-gradient-to-br from-violet-500 to-pink-500 text-white font-bold text-3xl border-4 border-white shadow-xl flex-shrink-0">
-                {getInitials(profile.fullName)}
+              <div className="relative group flex-shrink-0">
+                <input
+                  ref={avatarInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={handleAvatarUpload}
+                  disabled={avatarUploading}
+                />
+                <button
+                  type="button"
+                  onClick={() => avatarInputRef.current?.click()}
+                  disabled={avatarUploading}
+                  className="flex items-center justify-center w-28 h-28 rounded-2xl bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 text-white font-bold text-3xl border-4 border-white shadow-xl overflow-hidden hover:opacity-90 transition-opacity disabled:opacity-70"
+                >
+                  {avatarUploading ? (
+                    <Loader2 size={32} className="animate-spin" />
+                  ) : profile.avatarUrl ? (
+                    <img
+                      src={profile.avatarUrl}
+                      alt={profile.fullName}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    getInitials(profile.fullName)
+                  )}
+                </button>
+                <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                  <Camera size={24} className="text-white" />
+                </div>
               </div>
 
               {/* Name + Meta */}
               <div className="flex-1 min-w-0 sm:pb-1">
-                <h1 className="text-2xl font-bold text-gray-800 truncate">
+                <h1 className="text-2xl font-bold text-white truncate">
                   {profile.fullName}
                 </h1>
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5 text-sm text-gray-500">
@@ -375,7 +458,7 @@ export default function ProfilePage() {
                   </span>
                 </div>
                 <div className="mt-2">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold text-violet-700 bg-violet-100 rounded-full">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold text-slate-700 bg-slate-100 rounded-full">
                     <User size={12} />
                     {roleLabels[profile.role] || 'Người dùng'}
                   </span>
@@ -389,7 +472,7 @@ export default function ProfilePage() {
                     <button
                       onClick={handleSave}
                       disabled={saving}
-                      className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-violet-500 to-pink-500 rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-70"
+                      className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-70"
                     >
                       {saving ? (
                         <Loader2 size={16} className="animate-spin" />
@@ -409,7 +492,7 @@ export default function ProfilePage() {
                 ) : (
                   <button
                     onClick={handleStartEdit}
-                    className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-violet-600 bg-white border-2 border-violet-200 rounded-xl hover:bg-violet-50 transition-all"
+                    className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-slate-600 bg-white border-2 border-slate-200 rounded-xl hover:bg-slate-50 transition-all"
                   >
                     <Edit3 size={16} /> Chỉnh sửa
                   </button>
@@ -426,7 +509,7 @@ export default function ProfilePage() {
               <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
                   <h2 className="flex items-center gap-2 text-base font-semibold text-gray-800">
-                    <User size={18} className="text-violet-600" />
+                    <User size={18} className="text-slate-600" />
                     Thông tin cá nhân
                   </h2>
                 </div>
@@ -445,7 +528,7 @@ export default function ProfilePage() {
                             setEditData({ ...editData, fullName: e.target.value });
                             if (editErrors.fullName) setEditErrors({ ...editErrors, fullName: '' });
                           }}
-                          className={`w-full px-4 py-3 text-sm bg-white border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all ${
+                          className={`w-full px-4 py-3 text-sm bg-white border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all ${
                             editErrors.fullName ? 'border-red-300' : 'border-gray-200'
                           }`}
                           placeholder="Nhập họ và tên..."
@@ -481,7 +564,7 @@ export default function ProfilePage() {
                             setEditData({ ...editData, phone: e.target.value });
                             if (editErrors.phone) setEditErrors({ ...editErrors, phone: '' });
                           }}
-                          className={`w-full px-4 py-3 text-sm bg-white border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all ${
+                          className={`w-full px-4 py-3 text-sm bg-white border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all ${
                             editErrors.phone ? 'border-red-300' : 'border-gray-200'
                           }`}
                           placeholder="VD: 0912345678"
@@ -500,7 +583,7 @@ export default function ProfilePage() {
                           value={editData.address}
                           onChange={(e) => setEditData({ ...editData, address: e.target.value })}
                           rows={2}
-                          className="w-full px-4 py-3 text-sm bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all resize-none"
+                          className="w-full px-4 py-3 text-sm bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all resize-none"
                           placeholder="Nhập địa chỉ..."
                         />
                       </div>
@@ -509,7 +592,7 @@ export default function ProfilePage() {
                     <div className="grid gap-4 sm:grid-cols-2">
                       {/* Full Name */}
                       <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl">
-                        <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-violet-100 text-violet-600 flex-shrink-0">
+                        <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-slate-100 text-slate-600 flex-shrink-0">
                           <User size={18} />
                         </div>
                         <div className="min-w-0">
@@ -520,7 +603,7 @@ export default function ProfilePage() {
 
                       {/* Email */}
                       <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl">
-                        <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-pink-100 text-pink-600 flex-shrink-0">
+                        <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-slate-100 text-slate-600 flex-shrink-0">
                           <Mail size={18} />
                         </div>
                         <div className="min-w-0">
@@ -563,12 +646,12 @@ export default function ProfilePage() {
               <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
                   <h2 className="flex items-center gap-2 text-base font-semibold text-gray-800">
-                    <Users size={18} className="text-violet-600" />
+                    <Users size={18} className="text-slate-600" />
                     Nhóm đã tham gia ({joinedGroups.length})
                   </h2>
                   <Link
                     href="/groups"
-                    className="text-sm font-medium text-violet-600 hover:text-violet-800 transition-colors"
+                    className="text-sm font-medium text-slate-600 hover:text-slate-800 transition-colors"
                   >
                     Xem tất cả →
                   </Link>
@@ -580,7 +663,7 @@ export default function ProfilePage() {
                       <p className="text-sm text-gray-500">Bạn chưa tham gia nhóm nào</p>
                       <Link
                         href="/groups"
-                        className="inline-flex items-center gap-2 mt-3 px-4 py-2 text-sm font-medium text-violet-600 bg-violet-50 rounded-xl hover:bg-violet-100 transition-colors"
+                        className="inline-flex items-center gap-2 mt-3 px-4 py-2 text-sm font-medium text-slate-600 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors"
                       >
                         <Users size={16} /> Khám phá nhóm học
                       </Link>
@@ -598,7 +681,7 @@ export default function ProfilePage() {
 
                           {/* Info */}
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-gray-800 group-hover:text-violet-600 transition-colors truncate">
+                            <p className="text-sm font-semibold text-gray-800 group-hover:text-slate-600 transition-colors truncate">
                               {group.name}
                             </p>
                             <div className="flex items-center gap-2 mt-0.5">
@@ -606,7 +689,7 @@ export default function ProfilePage() {
                               {group.subjectTags.length > 0 && (
                                 <>
                                   <span className="text-xs text-gray-300">•</span>
-                                  <span className="px-1.5 py-0.5 text-xs font-medium text-violet-600 bg-violet-50 rounded">
+                                  <span className="px-1.5 py-0.5 text-xs font-medium text-slate-600 bg-slate-50 rounded">
                                     {group.subjectTags[0]}
                                   </span>
                                 </>
@@ -636,16 +719,16 @@ export default function ProfilePage() {
                 </div>
                 <div className="p-5">
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="p-3.5 text-center bg-violet-50 rounded-xl">
-                      <div className="flex items-center justify-center w-9 h-9 mx-auto mb-2 rounded-lg bg-violet-100">
-                        <BookOpen size={18} className="text-violet-600" />
+                    <div className="p-3.5 text-center bg-slate-50 rounded-xl">
+                      <div className="flex items-center justify-center w-9 h-9 mx-auto mb-2 rounded-lg bg-slate-100">
+                        <BookOpen size={18} className="text-slate-600" />
                       </div>
                       <p className="text-xl font-bold text-gray-800">0</p>
                       <p className="text-xs text-gray-500 mt-0.5">Bài viết</p>
                     </div>
-                    <div className="p-3.5 text-center bg-pink-50 rounded-xl">
-                      <div className="flex items-center justify-center w-9 h-9 mx-auto mb-2 rounded-lg bg-pink-100">
-                        <Users size={18} className="text-pink-600" />
+                    <div className="p-3.5 text-center bg-slate-50 rounded-xl">
+                      <div className="flex items-center justify-center w-9 h-9 mx-auto mb-2 rounded-lg bg-slate-100">
+                        <Users size={18} className="text-slate-600" />
                       </div>
                       <p className="text-xl font-bold text-gray-800">{profile.joinedGroupsCount}</p>
                       <p className="text-xs text-gray-500 mt-0.5">Nhóm học</p>
@@ -669,7 +752,7 @@ export default function ProfilePage() {
               </div>
 
               {/* Learning CTA */}
-              <div className="p-5 bg-gradient-to-br from-violet-500 to-pink-500 rounded-2xl text-white">
+              <div className="p-5 bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 rounded-2xl text-white">
                 <div className="flex items-center gap-2 mb-3">
                   <Trophy size={18} className="text-amber-300" />
                   <h3 className="font-semibold">Bắt đầu học ngay!</h3>
@@ -679,7 +762,7 @@ export default function ProfilePage() {
                 </p>
                 <Link
                   href="/pomodoro"
-                  className="flex items-center justify-center gap-2 w-full py-2.5 text-sm font-semibold text-violet-600 bg-white rounded-xl hover:shadow-lg transition-all"
+                  className="flex items-center justify-center gap-2 w-full py-2.5 text-sm font-semibold text-slate-600 bg-white rounded-xl hover:shadow-lg transition-all"
                 >
                   <Timer size={16} /> Pomodoro Timer
                 </Link>
@@ -693,25 +776,25 @@ export default function ProfilePage() {
                 <div className="p-3">
                   <Link
                     href="/community"
-                    className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 hover:bg-violet-50 hover:text-violet-600 rounded-xl transition-colors"
+                    className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 hover:bg-slate-50 hover:text-slate-600 rounded-xl transition-colors"
                   >
                     <BookOpen size={16} /> Bảng tin cộng đồng
                   </Link>
                   <Link
                     href="/groups"
-                    className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 hover:bg-violet-50 hover:text-violet-600 rounded-xl transition-colors"
+                    className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 hover:bg-slate-50 hover:text-slate-600 rounded-xl transition-colors"
                   >
                     <Users size={16} /> Tìm nhóm học
                   </Link>
                   <Link
                     href="/pomodoro"
-                    className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 hover:bg-violet-50 hover:text-violet-600 rounded-xl transition-colors"
+                    className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 hover:bg-slate-50 hover:text-slate-600 rounded-xl transition-colors"
                   >
                     <Timer size={16} /> Pomodoro Timer
                   </Link>
                   <Link
                     href="/contact"
-                    className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 hover:bg-violet-50 hover:text-violet-600 rounded-xl transition-colors"
+                    className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 hover:bg-slate-50 hover:text-slate-600 rounded-xl transition-colors"
                   >
                     <GraduationCap size={16} /> Đăng ký Mentor
                   </Link>

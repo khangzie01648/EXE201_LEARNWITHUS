@@ -103,7 +103,7 @@ export async function POST(
     }
 
     const message = group.isPrivate
-      ? 'Đã gửi yêu cầu tham gia nhóm. Vui lòng chờ admin duyệt.'
+      ? 'Đã gửi yêu cầu tham gia nhóm. Vui lòng chờ mentor duyệt.'
       : 'Tham gia nhóm học thành công!';
 
     return NextResponse.json<ApiResponse<{ status: string }>>(

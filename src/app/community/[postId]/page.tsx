@@ -63,11 +63,11 @@ interface RelatedPost {
 }
 
 const avatarColors = [
-  'from-violet-500 to-pink-500',
+  'from-slate-800 via-slate-900 to-slate-950',
   'from-emerald-500 to-cyan-500',
-  'from-amber-500 to-rose-500',
-  'from-indigo-500 to-violet-500',
-  'from-pink-500 to-rose-500',
+  'from-amber-500 to-amber-600',
+  'from-indigo-500 to-slate-600',
+  'from-slate-600 to-slate-800',
   'from-cyan-500 to-blue-500',
 ];
 
@@ -151,16 +151,16 @@ function CommentItem({
             <button
               onClick={handleLike}
               className={`flex items-center gap-1 text-xs transition-colors ${
-                liked ? 'text-pink-600 font-medium' : 'text-gray-400 hover:text-pink-500'
+                liked ? 'text-slate-600 font-medium' : 'text-gray-400 hover:text-slate-500'
               }`}
             >
-              <ThumbsUp size={13} className={liked ? 'fill-pink-500' : ''} />
+              <ThumbsUp size={13} className={liked ? 'fill-slate-500' : ''} />
               {likeCount}
             </button>
             {!isReply && (
               <button
                 onClick={() => setShowReplyInput(!showReplyInput)}
-                className="flex items-center gap-1 text-xs text-gray-400 hover:text-violet-500 transition-colors"
+                className="flex items-center gap-1 text-xs text-gray-400 hover:text-slate-500 transition-colors"
               >
                 <CornerDownRight size={13} />
                 Trả lời
@@ -180,7 +180,7 @@ function CommentItem({
                 value={replyText}
                 onChange={(e) => setReplyText(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleReply()}
-                className="flex-1 px-3 py-2 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                className="flex-1 px-3 py-2 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                 autoFocus
               />
               <button
@@ -188,7 +188,7 @@ function CommentItem({
                 disabled={!replyText.trim() || replying}
                 className={`p-2 rounded-xl transition-all ${
                   replyText.trim() && !replying
-                    ? 'text-white bg-gradient-to-r from-violet-500 to-pink-500'
+                    ? 'text-white bg-gradient-to-r from-slate-800 via-slate-900 to-slate-950'
                     : 'text-gray-300 bg-gray-100'
                 }`}
               >
@@ -338,7 +338,7 @@ export default function PostDetailPage() {
         <Header />
         <main className="flex items-center justify-center py-32">
           <div className="text-center">
-            <Loader2 size={48} className="mx-auto mb-4 text-violet-400 animate-spin" />
+            <Loader2 size={48} className="mx-auto mb-4 text-slate-400 animate-spin" />
             <p className="text-gray-500">Đang tải bài viết...</p>
           </div>
         </main>
@@ -357,7 +357,7 @@ export default function PostDetailPage() {
             <p className="text-gray-500 font-medium">{error || 'Không tìm thấy bài viết'}</p>
             <Link
               href="/community"
-              className="inline-flex items-center gap-2 mt-4 text-sm text-violet-600 hover:text-violet-800"
+              className="inline-flex items-center gap-2 mt-4 text-sm text-slate-600 hover:text-slate-800"
             >
               <ArrowLeft size={16} /> Quay lại bảng tin
             </Link>
@@ -378,7 +378,7 @@ export default function PostDetailPage() {
             {/* Back Button */}
             <Link
               href="/community"
-              className="inline-flex items-center gap-2 mb-4 text-sm font-medium text-gray-500 hover:text-violet-600 transition-colors"
+              className="inline-flex items-center gap-2 mb-4 text-sm font-medium text-gray-500 hover:text-slate-600 transition-colors"
             >
               <ArrowLeft size={16} />
               Quay lại bảng tin
@@ -406,7 +406,7 @@ export default function PostDetailPage() {
                       {post.groupName && (
                         <Link
                           href={`/groups/${post.groupId}`}
-                          className="text-xs font-medium text-violet-600 bg-violet-50 px-2.5 py-0.5 rounded-full hover:bg-violet-100 transition-colors"
+                          className="text-xs font-medium text-slate-600 bg-slate-50 px-2.5 py-0.5 rounded-full hover:bg-slate-100 transition-colors"
                         >
                           {post.groupName}
                         </Link>
@@ -443,7 +443,7 @@ export default function PostDetailPage() {
                   {post.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="px-2.5 py-1 text-xs font-medium text-violet-600 bg-violet-50 rounded-full cursor-pointer hover:bg-violet-100 transition-colors"
+                      className="px-2.5 py-1 text-xs font-medium text-slate-600 bg-slate-50 rounded-full cursor-pointer hover:bg-slate-100 transition-colors"
                     >
                       #{tag}
                     </span>
@@ -458,14 +458,14 @@ export default function PostDetailPage() {
                     onClick={handleLike}
                     className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
                       liked
-                        ? 'text-pink-600 bg-pink-50'
-                        : 'text-gray-500 hover:bg-gray-50 hover:text-pink-500'
+                        ? 'text-slate-600 bg-slate-50'
+                        : 'text-gray-500 hover:bg-gray-50 hover:text-slate-500'
                     }`}
                   >
-                    <Heart size={18} className={liked ? 'fill-pink-500' : ''} />
+                    <Heart size={18} className={liked ? 'fill-slate-500' : ''} />
                     {likeCount}
                   </button>
-                  <button className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-violet-500 transition-all">
+                  <button className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-slate-500 transition-all">
                     <MessageSquare size={18} />
                     {post.commentsCount}
                   </button>
@@ -487,7 +487,7 @@ export default function PostDetailPage() {
 
             {/* Comment Input */}
             <div className="flex gap-3 mt-6 p-4 bg-white rounded-2xl border border-gray-100">
-              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 text-white font-semibold text-sm flex-shrink-0">
+              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 text-white font-semibold text-sm flex-shrink-0">
                 {userInitials}
               </div>
               <div className="flex-1 flex gap-2">
@@ -497,14 +497,14 @@ export default function PostDetailPage() {
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleComment()}
-                  className="flex-1 px-4 py-2.5 text-sm bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
+                  className="flex-1 px-4 py-2.5 text-sm bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all"
                 />
                 <button
                   onClick={handleComment}
                   disabled={!commentText.trim() || commentLoading}
                   className={`px-4 py-2.5 rounded-xl font-medium text-sm transition-all ${
                     commentText.trim() && !commentLoading
-                      ? 'text-white bg-gradient-to-r from-violet-500 to-pink-500 shadow-md hover:shadow-lg'
+                      ? 'text-white bg-gradient-to-r from-slate-800 via-slate-900 to-slate-950 shadow-md hover:shadow-lg'
                       : 'text-gray-300 bg-gray-100 cursor-not-allowed'
                   }`}
                 >
@@ -516,7 +516,7 @@ export default function PostDetailPage() {
             {/* Comments List */}
             <div className="mt-6 space-y-5">
               <h3 className="flex items-center gap-2 text-base font-semibold text-gray-800">
-                <MessageSquare size={18} className="text-violet-600" />
+                <MessageSquare size={18} className="text-slate-600" />
                 Bình luận ({comments.length})
               </h3>
               {comments.length === 0 ? (
@@ -542,9 +542,9 @@ export default function PostDetailPage() {
                     <Link
                       key={rp.id}
                       href={`/community/${rp.id}`}
-                      className="block p-3 rounded-xl hover:bg-violet-50 transition-colors group"
+                      className="block p-3 rounded-xl hover:bg-slate-50 transition-colors group"
                     >
-                      <p className="text-sm font-medium text-gray-800 group-hover:text-violet-600 transition-colors line-clamp-2">
+                      <p className="text-sm font-medium text-gray-800 group-hover:text-slate-600 transition-colors line-clamp-2">
                         {rp.title}
                       </p>
                       <p className="flex items-center gap-1 mt-1 text-xs text-gray-400">

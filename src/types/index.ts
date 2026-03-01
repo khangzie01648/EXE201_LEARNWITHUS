@@ -6,7 +6,8 @@ export enum UserRole {
   Admin = 0,
   Staff = 1,
   Client = 2,
-  Manager = 3
+  Manager = 3,
+  Mentor = 4
 }
 
 export enum BookingStatus {
@@ -118,6 +119,7 @@ export interface User extends BaseEntity {
   email: string;
   phone: string;
   address: string;
+  avatarUrl?: string;
   passwordHash?: string;  // Not exposed to client
   role: UserRole;
   isActive: boolean;
@@ -560,7 +562,8 @@ export const UserRoleLabels: Record<UserRole, string> = {
   [UserRole.Admin]: 'Quản trị viên',
   [UserRole.Staff]: 'Nhân viên',
   [UserRole.Client]: 'Khách hàng',
-  [UserRole.Manager]: 'Quản lý'
+  [UserRole.Manager]: 'Quản lý',
+  [UserRole.Mentor]: 'Mentor'
 };
 
 export const SampleTypeLabels: Record<SampleType, string> = {

@@ -185,7 +185,7 @@ export default function CreatePostPage() {
             disabled={!canSubmit || loading}
             className={`flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-xl transition-all ${
               canSubmit && !loading
-                ? 'text-white bg-gradient-to-r from-violet-500 to-pink-500 shadow-lg shadow-violet-200 hover:shadow-xl hover:-translate-y-0.5'
+                ? 'text-white bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 shadow-lg shadow-slate-200 hover:shadow-xl hover:-translate-y-0.5'
                 : 'text-gray-400 bg-gray-100 cursor-not-allowed'
             }`}
           >
@@ -214,7 +214,7 @@ export default function CreatePostPage() {
             <select
               value={groupId}
               onChange={(e) => setGroupId(e.target.value)}
-              className="w-full px-4 py-3 text-sm bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
+              className="w-full px-4 py-3 text-sm bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all"
             >
               <option value="">Tất cả (không chọn nhóm)</option>
               {groups.map((g) => (
@@ -232,7 +232,7 @@ export default function CreatePostPage() {
               placeholder="Tiêu đề bài viết (tùy chọn)"
               value={title}
               onChange={(e) => setTitle(e.target.value.slice(0, 100))}
-              className="w-full px-4 py-3 text-base font-semibold bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent placeholder:text-gray-400 placeholder:font-normal transition-all"
+              className="w-full px-4 py-3 text-base font-semibold bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent placeholder:text-gray-400 placeholder:font-normal transition-all"
               maxLength={100}
             />
             <p className="mt-1 text-xs text-gray-400 text-right">{title.length}/100</p>
@@ -245,7 +245,7 @@ export default function CreatePostPage() {
               value={body}
               onChange={(e) => setBody(e.target.value.slice(0, 2000))}
               rows={6}
-              className="w-full px-4 py-3 text-sm bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent placeholder:text-gray-400 resize-none transition-all"
+              className="w-full px-4 py-3 text-sm bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent placeholder:text-gray-400 resize-none transition-all"
               maxLength={2000}
               style={{ minHeight: '150px' }}
             />
@@ -303,7 +303,7 @@ export default function CreatePostPage() {
               {tags.map((tag) => (
                 <span
                   key={tag}
-                  className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-violet-600 bg-violet-50 rounded-full"
+                  className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-50 rounded-full"
                 >
                   #{tag}
                   <button onClick={() => removeTag(tag)} className="hover:text-red-500 transition-colors">
@@ -319,7 +319,7 @@ export default function CreatePostPage() {
               onChange={(e) => setTagInput(e.target.value)}
               onKeyDown={handleTagKeyDown}
               disabled={tags.length >= 5}
-              className="w-full px-4 py-2.5 text-sm bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent placeholder:text-gray-400 transition-all"
+              className="w-full px-4 py-2.5 text-sm bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent placeholder:text-gray-400 transition-all"
             />
             {/* Suggested tags */}
             <div className="flex flex-wrap gap-1.5 mt-2">
@@ -330,7 +330,7 @@ export default function CreatePostPage() {
                     key={tag}
                     type="button"
                     onClick={() => addTag(tag)}
-                    className="px-2.5 py-1 text-xs text-gray-500 bg-gray-100 rounded-full hover:bg-violet-50 hover:text-violet-600 transition-all"
+                    className="px-2.5 py-1 text-xs text-gray-500 bg-gray-100 rounded-full hover:bg-slate-50 hover:text-slate-600 transition-all"
                   >
                     +{tag}
                   </button>
@@ -348,7 +348,7 @@ export default function CreatePostPage() {
               type="button"
               onClick={() => setAnonymous(!anonymous)}
               className={`relative w-11 h-6 rounded-full transition-colors ${
-                anonymous ? 'bg-violet-500' : 'bg-gray-300'
+                anonymous ? 'bg-slate-500' : 'bg-gray-300'
               }`}
               role="switch"
               aria-checked={anonymous}

@@ -71,11 +71,11 @@ function ConfirmModal({
         <div className="p-6 text-center">
           <div className={`inline-flex items-center justify-center w-16 h-16 mb-4 rounded-2xl ${
             variant === 'join'
-              ? 'bg-gradient-to-br from-violet-100 to-pink-100'
+              ? 'bg-gradient-to-br from-slate-100 to-slate-200'
               : 'bg-gradient-to-br from-red-100 to-orange-100'
           }`}>
             {variant === 'join' ? (
-              <Users size={28} className="text-violet-600" />
+              <Users size={28} className="text-slate-600" />
             ) : (
               <AlertTriangle size={28} className="text-red-500" />
             )}
@@ -95,7 +95,7 @@ function ConfirmModal({
               disabled={loading}
               className={`flex-1 px-4 py-2.5 text-sm font-semibold text-white rounded-xl transition-all hover:shadow-lg disabled:opacity-70 ${
                 variant === 'join'
-                  ? 'bg-gradient-to-r from-violet-500 to-pink-500 hover:shadow-violet-200'
+                  ? 'bg-gradient-to-r from-slate-800 via-slate-900 to-slate-950 hover:shadow-slate-200'
                   : 'bg-gradient-to-r from-red-500 to-orange-500 hover:shadow-red-200'
               }`}
             >
@@ -139,11 +139,11 @@ const DEFAULT_RULES = [
 ];
 
 const avatarColors = [
-  'from-violet-500 to-pink-500',
+  'from-slate-800 via-slate-900 to-slate-950',
   'from-emerald-500 to-cyan-500',
-  'from-amber-500 to-rose-500',
-  'from-indigo-500 to-violet-500',
-  'from-pink-500 to-rose-500',
+  'from-amber-500 to-amber-600',
+  'from-indigo-500 to-slate-600',
+  'from-slate-600 to-slate-800',
   'from-cyan-500 to-blue-500',
 ];
 
@@ -216,7 +216,7 @@ function GroupPostCard({ post, isAdmin }: { post: GroupPost; isAdmin: boolean })
       </div>
       <Link href={`/community/${post.id}`} className="block group">
         {post.title && (
-          <h3 className="text-base font-semibold text-gray-800 group-hover:text-violet-600 transition-colors mb-1">
+          <h3 className="text-base font-semibold text-gray-800 group-hover:text-slate-600 transition-colors mb-1">
             {post.title}
           </h3>
         )}
@@ -225,7 +225,7 @@ function GroupPostCard({ post, isAdmin }: { post: GroupPost; isAdmin: boolean })
       {post.tags.length > 0 && (
         <div className="flex flex-wrap gap-1.5 mt-2">
           {post.tags.map((tag) => (
-            <span key={tag} className="px-2 py-0.5 text-xs font-medium text-violet-600 bg-violet-50 rounded-full">
+            <span key={tag} className="px-2 py-0.5 text-xs font-medium text-slate-600 bg-slate-50 rounded-full">
               #{tag}
             </span>
           ))}
@@ -234,9 +234,9 @@ function GroupPostCard({ post, isAdmin }: { post: GroupPost; isAdmin: boolean })
       <div className="flex items-center gap-3 mt-3 pt-3 border-t border-gray-100">
         <button
           onClick={handleLike}
-          className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm transition-all ${liked ? 'text-pink-600 bg-pink-50' : 'text-gray-500 hover:bg-gray-50'}`}
+          className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm transition-all ${liked ? 'text-slate-600 bg-slate-50' : 'text-gray-500 hover:bg-gray-50'}`}
         >
-          <Heart size={15} className={liked ? 'fill-pink-500' : ''} />
+          <Heart size={15} className={liked ? 'fill-slate-500' : ''} />
           {likeCount}
         </button>
         <Link href={`/community/${post.id}`} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm text-gray-500 hover:bg-gray-50 transition-all">
@@ -405,7 +405,7 @@ export default function GroupDetailPage() {
         );
       case 'moderator':
         return (
-          <span className="flex items-center gap-1 px-2 py-0.5 text-xs font-semibold text-violet-700 bg-violet-100 rounded-full">
+          <span className="flex items-center gap-1 px-2 py-0.5 text-xs font-semibold text-slate-700 bg-slate-100 rounded-full">
             <Shield size={12} /> Mod
           </span>
         );
@@ -421,7 +421,7 @@ export default function GroupDetailPage() {
         <Header />
         <div className="flex items-center justify-center py-32">
           <div className="text-center">
-            <Loader2 size={48} className="mx-auto mb-4 text-violet-400 animate-spin" />
+            <Loader2 size={48} className="mx-auto mb-4 text-slate-400 animate-spin" />
             <p className="text-gray-500">Đang tải thông tin nhóm...</p>
           </div>
         </div>
@@ -439,7 +439,7 @@ export default function GroupDetailPage() {
           <div className="text-center">
             <Users size={48} className="mx-auto mb-4 text-gray-300" />
             <p className="text-gray-500 font-medium">Không tìm thấy nhóm học</p>
-            <Link href="/groups" className="mt-4 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-violet-600 bg-violet-50 rounded-xl hover:bg-violet-100 transition-colors">
+            <Link href="/groups" className="mt-4 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
               <ArrowLeft size={16} /> Quay lại danh sách nhóm
             </Link>
           </div>
@@ -504,7 +504,7 @@ export default function GroupDetailPage() {
                         }
                         setShowJoinModal(true);
                       }}
-                      className="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-violet-600 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all"
+                      className="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-slate-600 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all"
                     >
                       <Plus size={16} /> Tham gia nhóm
                     </button>
@@ -525,7 +525,7 @@ export default function GroupDetailPage() {
                   onClick={() => setActiveTab(tab.key)}
                   className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-xl whitespace-nowrap transition-all ${
                     activeTab === tab.key
-                      ? 'bg-violet-50 text-violet-600'
+                      ? 'bg-slate-50 text-slate-600'
                       : 'text-gray-500 hover:text-gray-800 hover:bg-gray-50'
                   }`}
                 >
@@ -549,21 +549,21 @@ export default function GroupDetailPage() {
                   {isMember && (
                     <Link
                       href="/community/create"
-                      className="flex items-center gap-3 p-4 bg-white rounded-2xl border border-gray-100 hover:border-violet-200 hover:shadow-sm transition-all"
+                      className="flex items-center gap-3 p-4 bg-white rounded-2xl border border-gray-100 hover:border-slate-200 hover:shadow-sm transition-all"
                     >
-                      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 text-white font-semibold text-sm flex-shrink-0">
+                      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 text-white font-semibold text-sm flex-shrink-0">
                         SV
                       </div>
                       <div className="flex-1 px-4 py-2.5 text-sm text-gray-400 bg-gray-50 rounded-xl">
                         Chia sẻ gì đó với nhóm...
                       </div>
-                      <Send size={18} className="text-violet-400" />
+                      <Send size={18} className="text-slate-400" />
                     </Link>
                   )}
 
                   {postsLoading ? (
                     <div className="py-12 text-center bg-white rounded-2xl border border-gray-100">
-                      <Loader2 size={32} className="mx-auto mb-3 text-violet-400 animate-spin" />
+                      <Loader2 size={32} className="mx-auto mb-3 text-slate-400 animate-spin" />
                       <p className="text-sm text-gray-400">Đang tải bài viết...</p>
                     </div>
                   ) : groupPosts.length === 0 ? (
@@ -586,7 +586,7 @@ export default function GroupDetailPage() {
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="text-base font-semibold text-gray-800">{group.membersCount} thành viên</h3>
                     {isAdmin && (
-                      <button className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-violet-600 bg-violet-50 rounded-xl hover:bg-violet-100 transition-colors">
+                      <button className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-slate-600 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
                         <UserPlus size={16} /> Mời thành viên
                       </button>
                     )}
@@ -649,7 +649,7 @@ export default function GroupDetailPage() {
                 <p className="text-sm text-gray-600 leading-relaxed">{group.description}</p>
                 <div className="flex flex-wrap gap-1.5 mt-3">
                   {(group.subjectTags || []).map((tag) => (
-                    <span key={tag} className="px-2.5 py-1 text-xs font-medium text-violet-600 bg-violet-50 rounded-full">
+                    <span key={tag} className="px-2.5 py-1 text-xs font-medium text-slate-600 bg-slate-50 rounded-full">
                       {tag}
                     </span>
                   ))}
@@ -682,14 +682,14 @@ export default function GroupDetailPage() {
                   <h3 className="mb-2 text-sm font-semibold text-gray-800">Hành động nhanh</h3>
                   <Link
                     href="/community/create"
-                    className="flex items-center gap-2 w-full px-3 py-2.5 text-sm text-gray-700 hover:bg-violet-50 hover:text-violet-600 rounded-xl transition-colors"
+                    className="flex items-center gap-2 w-full px-3 py-2.5 text-sm text-gray-700 hover:bg-slate-50 hover:text-slate-600 rounded-xl transition-colors"
                   >
                     <Plus size={16} /> Tạo bài viết
                   </Link>
-                  <button className="flex items-center gap-2 w-full px-3 py-2.5 text-sm text-gray-700 hover:bg-violet-50 hover:text-violet-600 rounded-xl transition-colors">
+                  <button className="flex items-center gap-2 w-full px-3 py-2.5 text-sm text-gray-700 hover:bg-slate-50 hover:text-slate-600 rounded-xl transition-colors">
                     <UserPlus size={16} /> Mời bạn bè
                   </button>
-                  <button className="flex items-center gap-2 w-full px-3 py-2.5 text-sm text-gray-700 hover:bg-violet-50 hover:text-violet-600 rounded-xl transition-colors">
+                  <button className="flex items-center gap-2 w-full px-3 py-2.5 text-sm text-gray-700 hover:bg-slate-50 hover:text-slate-600 rounded-xl transition-colors">
                     <Share2 size={16} /> Chia sẻ nhóm
                   </button>
                 </div>
@@ -701,7 +701,7 @@ export default function GroupDetailPage() {
                 <ol className="space-y-2">
                   {(group.rules && group.rules.length > 0 ? group.rules : DEFAULT_RULES).map((rule, i) => (
                     <li key={i} className="flex gap-2 text-sm text-gray-600">
-                      <span className="flex items-center justify-center w-5 h-5 text-xs font-bold text-violet-600 bg-violet-50 rounded-full flex-shrink-0">
+                      <span className="flex items-center justify-center w-5 h-5 text-xs font-bold text-slate-600 bg-slate-50 rounded-full flex-shrink-0">
                         {i + 1}
                       </span>
                       {rule}

@@ -58,11 +58,11 @@ const TRENDING_TAGS = [
 ];
 
 const avatarColors = [
-  'from-violet-500 to-pink-500',
+  'from-slate-800 via-slate-900 to-slate-950',
   'from-emerald-500 to-cyan-500',
   'from-amber-500 to-rose-500',
-  'from-indigo-500 to-violet-500',
-  'from-pink-500 to-rose-500',
+  'from-indigo-500 to-slate-600',
+  'from-slate-600 to-slate-800',
   'from-cyan-500 to-blue-500',
 ];
 
@@ -157,7 +157,7 @@ function PostCard({ post }: { post: PostData }) {
               {post.groupName && (
                 <Link
                   href={`/groups/${post.groupId}`}
-                  className="text-xs font-medium text-violet-600 bg-violet-50 px-2 py-0.5 rounded-full hover:bg-violet-100 transition-colors"
+                  className="text-xs font-medium text-slate-600 bg-slate-50 px-2 py-0.5 rounded-full hover:bg-slate-100 transition-colors"
                   onClick={(e) => e.stopPropagation()}
                 >
                   {post.groupName}
@@ -189,13 +189,13 @@ function PostCard({ post }: { post: PostData }) {
       {/* Content */}
       <Link href={`/community/${post.id}`} className="block group">
         {post.title && (
-          <h3 className="mb-1.5 text-base font-semibold text-gray-800 group-hover:text-violet-600 transition-colors">
+          <h3 className="mb-1.5 text-base font-semibold text-gray-800 group-hover:text-slate-600 transition-colors">
             {post.title}
           </h3>
         )}
         <p className="text-sm text-gray-600 leading-relaxed line-clamp-3">{post.body}</p>
         {post.body.length > 150 && (
-          <span className="text-sm font-medium text-violet-600 mt-1 inline-block">Xem thêm</span>
+          <span className="text-sm font-medium text-slate-600 mt-1 inline-block">Xem thêm</span>
         )}
       </Link>
 
@@ -205,7 +205,7 @@ function PostCard({ post }: { post: PostData }) {
           {post.tags.map((tag) => (
             <span
               key={tag}
-              className="px-2.5 py-1 text-xs font-medium text-violet-600 bg-violet-50 rounded-full cursor-pointer hover:bg-violet-100 transition-colors"
+              className="px-2.5 py-1 text-xs font-medium text-slate-600 bg-slate-50 rounded-full cursor-pointer hover:bg-slate-100 transition-colors"
             >
               #{tag}
             </span>
@@ -220,17 +220,17 @@ function PostCard({ post }: { post: PostData }) {
             onClick={handleLike}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-all ${
               liked
-                ? 'text-pink-600 bg-pink-50 font-medium'
-                : 'text-gray-500 hover:bg-gray-50 hover:text-pink-500'
+                ? 'text-slate-600 bg-slate-50 font-medium'
+                : 'text-gray-500 hover:bg-gray-50 hover:text-slate-500'
             }`}
             aria-label={liked ? 'Bỏ thích' : 'Thích'}
           >
-            <Heart size={16} className={liked ? 'fill-pink-500' : ''} />
+            <Heart size={16} className={liked ? 'fill-slate-500' : ''} />
             {likeCount}
           </button>
           <Link
             href={`/community/${post.id}`}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-gray-500 hover:bg-gray-50 hover:text-violet-500 transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-gray-500 hover:bg-gray-50 hover:text-slate-500 transition-all"
           >
             <MessageSquare size={16} />
             {post.commentsCount}
@@ -331,12 +331,12 @@ export default function CommunityPage() {
               placeholder="Tìm bài, nhóm, môn…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full py-3 pl-11 pr-4 text-sm bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
+              className="w-full py-3 pl-11 pr-4 text-sm bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all"
             />
           </div>
           <Link
             href="/community/create"
-            className="flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-gradient-to-r from-violet-500 to-pink-500 rounded-xl shadow-lg shadow-violet-200 hover:shadow-xl hover:shadow-pink-200 hover:-translate-y-0.5 transition-all"
+            className="flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-gradient-to-r from-slate-800 via-slate-900 to-slate-950 rounded-xl shadow-lg shadow-slate-200 hover:shadow-xl hover:shadow-slate-300 hover:-translate-y-0.5 transition-all"
           >
             <Plus size={18} />
             Tạo bài mới
@@ -353,7 +353,7 @@ export default function CommunityPage() {
                 onClick={() => setActiveTab(tab.key)}
                 className={`px-4 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition-all ${
                   activeTab === tab.key
-                    ? 'bg-gradient-to-r from-violet-500 to-pink-500 text-white shadow-md'
+                    ? 'bg-gradient-to-r from-slate-800 via-slate-900 to-slate-950 text-white shadow-md'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 }`}
               >
@@ -368,7 +368,7 @@ export default function CommunityPage() {
             <select
               value={timeFilter}
               onChange={(e) => setTimeFilter(e.target.value as TimeFilter)}
-              className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
+              className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500"
             >
               <option value="all">Tất cả thời gian</option>
               <option value="today">Hôm nay</option>
@@ -383,7 +383,7 @@ export default function CommunityPage() {
           <div className="flex-1 min-w-0 space-y-4">
             {loading ? (
               <div className="py-16 text-center bg-white rounded-2xl border border-gray-100">
-                <Loader2 size={48} className="mx-auto mb-4 text-violet-400 animate-spin" />
+                <Loader2 size={48} className="mx-auto mb-4 text-slate-400 animate-spin" />
                 <p className="text-gray-500">Đang tải bài viết...</p>
               </div>
             ) : filteredPosts.length === 0 ? (
@@ -393,7 +393,7 @@ export default function CommunityPage() {
                 <p className="mt-1 text-sm text-gray-400">Hãy là người đầu tiên chia sẻ!</p>
                 <Link
                   href="/community/create"
-                  className="inline-flex items-center gap-2 mt-4 px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-violet-500 to-pink-500 rounded-xl"
+                  className="inline-flex items-center gap-2 mt-4 px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-slate-800 via-slate-900 to-slate-950 rounded-xl"
                 >
                   <Plus size={16} /> Tạo bài viết
                 </Link>
@@ -412,7 +412,7 @@ export default function CommunityPage() {
             {/* Trending Topics */}
             <div className="p-5 bg-white rounded-2xl border border-gray-100">
               <h3 className="flex items-center gap-2 mb-4 text-sm font-semibold text-gray-800">
-                <TrendingUp size={16} className="text-violet-600" />
+                <TrendingUp size={16} className="text-slate-600" />
                 Chủ đề thịnh hành
               </h3>
               <div className="space-y-3">
@@ -423,7 +423,7 @@ export default function CommunityPage() {
                   >
                     <div className="flex items-center gap-2">
                       <span className="w-5 text-xs font-bold text-gray-400">{index + 1}</span>
-                      <span className="text-sm text-gray-700 group-hover:text-violet-600 transition-colors">
+                      <span className="text-sm text-gray-700 group-hover:text-slate-600 transition-colors">
                         #{tag.name}
                       </span>
                     </div>
@@ -436,7 +436,7 @@ export default function CommunityPage() {
             {/* Suggested Groups */}
             <div className="p-5 bg-white rounded-2xl border border-gray-100">
               <h3 className="flex items-center gap-2 mb-4 text-sm font-semibold text-gray-800">
-                <Users size={16} className="text-pink-500" />
+                <Users size={16} className="text-slate-500" />
                 Nhóm gợi ý
               </h3>
               <div className="space-y-3">
@@ -444,16 +444,16 @@ export default function CommunityPage() {
                   <Link
                     key={group.id}
                     href={`/groups/${group.id}`}
-                    className="flex items-center justify-between p-3 rounded-xl hover:bg-violet-50 transition-colors group"
+                    className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors group"
                   >
                     <div>
-                      <p className="text-sm font-medium text-gray-800 group-hover:text-violet-600 transition-colors">
+                      <p className="text-sm font-medium text-gray-800 group-hover:text-slate-600 transition-colors">
                         {group.name}
                       </p>
                       <p className="text-xs text-gray-400">{group.membersCount} thành viên</p>
                     </div>
                     {group.subjectTags[0] && (
-                      <span className="px-2 py-1 text-xs font-medium text-violet-600 bg-violet-50 rounded-full">
+                      <span className="px-2 py-1 text-xs font-medium text-slate-600 bg-slate-50 rounded-full">
                         {group.subjectTags[0]}
                       </span>
                     )}
@@ -462,21 +462,21 @@ export default function CommunityPage() {
               </div>
               <Link
                 href="/groups"
-                className="block mt-3 text-sm font-medium text-center text-violet-600 hover:text-violet-800 transition-colors"
+                className="block mt-3 text-sm font-medium text-center text-slate-600 hover:text-slate-800 transition-colors"
               >
                 Xem tất cả nhóm →
               </Link>
             </div>
 
             {/* Create Group CTA */}
-            <div className="p-5 bg-gradient-to-br from-violet-500 to-pink-500 rounded-2xl text-white">
+            <div className="p-5 bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 rounded-2xl text-white">
               <h3 className="mb-2 font-semibold">Tạo nhóm học</h3>
               <p className="mb-4 text-sm text-white/80">
                 Lập nhóm riêng cho lớp hoặc môn học của bạn.
               </p>
               <Link
                 href="/groups/create"
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-violet-600 bg-white rounded-xl hover:shadow-lg transition-all"
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-600 bg-white rounded-xl hover:shadow-lg transition-all"
               >
                 <Plus size={16} />
                 Tạo nhóm mới

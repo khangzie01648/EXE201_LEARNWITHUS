@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Header, Footer } from '@/components/shared';
 import {
@@ -11,6 +12,7 @@ import {
   Clock,
   ChevronRight,
   MessageSquare,
+  Loader2,
 } from 'lucide-react';
 
 // Mock data for mentor dashboard
@@ -26,6 +28,32 @@ const mockPendingRequests = [
 ];
 
 export default function MentorDashboardPage() {
+  const router = useRouter();
+  const [authorized, setAuthorized] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    if (!token) {
+      router.replace('/login');
+      return;
+    }
+    fetch('/api/mentor/check', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => {
+        if (res.ok) {
+          setAuthorized(true);
+        } else {
+          setAuthorized(false);
+          router.replace('/mentor/register');
+        }
+      })
+      .catch(() => {
+        setAuthorized(false);
+        router.replace('/login');
+      });
+  }, [router]);
+
   const [stats] = useState({
     totalSessions: 156,
     totalEarnings: 23400000,
@@ -35,6 +63,18 @@ export default function MentorDashboardPage() {
 
   const formatPrice = (price: number) =>
     new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+
+  if (authorized === null) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <Loader2 size={32} className="animate-spin text-slate-600" />
+      </div>
+    );
+  }
+
+  if (!authorized) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -49,8 +89,8 @@ export default function MentorDashboardPage() {
         {/* Stats */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
           <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-100">
-              <Calendar size={24} className="text-violet-600" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100">
+              <Calendar size={24} className="text-slate-600" />
             </div>
             <p className="mt-4 text-2xl font-bold text-gray-800">{stats.totalSessions}</p>
             <p className="text-sm text-gray-500">Tổng buổi tư vấn</p>
@@ -87,7 +127,7 @@ export default function MentorDashboardPage() {
               <h3 className="font-semibold text-gray-800">Lịch tư vấn sắp tới</h3>
               <Link
                 href="#"
-                className="flex items-center gap-1 text-sm font-medium text-violet-600 hover:text-violet-700"
+                className="flex items-center gap-1 text-sm font-medium text-slate-600 hover:text-slate-700"
               >
                 Xem tất cả
                 <ChevronRight size={16} />
@@ -100,8 +140,8 @@ export default function MentorDashboardPage() {
                   className="flex items-center justify-between px-6 py-4 hover:bg-gray-50/80 transition-colors"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-100">
-                      <Users size={20} className="text-violet-600" />
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100">
+                      <Users size={20} className="text-slate-600" />
                     </div>
                     <div>
                       <p className="font-medium text-gray-800">{session.student}</p>
@@ -161,7 +201,7 @@ export default function MentorDashboardPage() {
             Thu nhập được chuyển vào tài khoản ngân hàng đã đăng ký vào cuối mỗi tháng.
             Platform thu phí dịch vụ 20%, Mentor nhận 80% giá mỗi buổi.
           </p>
-          <div className="mt-4 flex items-center gap-2 text-sm text-violet-600">
+          <div className="mt-4 flex items-center gap-2 text-sm text-slate-600">
             <Clock size={16} />
             Liên hệ admin nếu cần hỗ trợ
           </div>

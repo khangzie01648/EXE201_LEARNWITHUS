@@ -118,7 +118,7 @@ export default function ForgotPasswordPage() {
   if (step === 'success') {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
-        <div className="max-w-md p-8 text-center bg-white rounded-2xl shadow-xl border border-violet-100">
+        <div className="max-w-md p-8 text-center bg-white rounded-2xl shadow-xl border border-slate-200">
           <div className="flex items-center justify-center w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-emerald-400 to-green-500">
             <CheckCircle size={40} className="text-white" />
           </div>

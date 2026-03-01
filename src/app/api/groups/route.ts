@@ -7,6 +7,7 @@ import { verifyToken } from '@/lib/utils';
 import { generateId } from '@/lib/firebase/firestore';
 import { FieldValue } from 'firebase-admin/firestore';
 import type { ApiResponse, StudyGroup, StudyGroupWithMembership, GroupMembershipStatus } from '@/types';
+import { User, UserRole } from '@/types';
 
 export async function GET(request: NextRequest) {
   try {
@@ -91,6 +92,28 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { name, description, subjectTags, isPrivate, coverColor } = body;
 
+    // Only Mentor can create private groups
+    if (isPrivate) {
+      const userDoc = await adminDb.collection(COLLECTIONS.users).doc(payload.userId).get();
+      if (!userDoc.exists) {
+        return NextResponse.json<ApiResponse<null>>(
+          { data: null, message: 'Không tìm thấy người dùng', statusCode: 404 },
+          { status: 404 }
+        );
+      }
+      const user = userDoc.data() as User;
+      if (user.role !== UserRole.Mentor) {
+        return NextResponse.json<ApiResponse<null>>(
+          {
+            data: null,
+            message: 'Chỉ tài khoản Mentor mới có thể tạo nhóm học riêng tư',
+            statusCode: 403,
+          },
+          { status: 403 }
+        );
+      }
+    }
+
     if (!name || name.trim().length < 3) {
       return NextResponse.json<ApiResponse<null>>(
         { data: null, message: 'Tên nhóm phải có ít nhất 3 ký tự', statusCode: 400 },
@@ -106,7 +129,7 @@ export async function POST(request: NextRequest) {
       id: groupId,
       name: name.trim(),
       description: description?.trim() || '',
-      coverColor: coverColor || 'from-violet-500 to-purple-600',
+      coverColor: coverColor || 'from-slate-800 via-slate-900 to-slate-950',
       subjectTags: subjectTags || [],
       isPrivate: isPrivate || false,
       createdBy: payload.userId,

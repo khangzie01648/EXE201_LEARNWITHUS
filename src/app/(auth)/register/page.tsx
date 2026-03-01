@@ -158,7 +158,7 @@ export default function RegisterPage() {
 
   if (showSuccess) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-violet-50 via-white to-pink-50">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
         <div className="max-w-md p-8 text-center bg-white rounded-2xl shadow-xl border border-violet-100">
           <div className="flex items-center justify-center w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-emerald-400 to-green-500">
             <CheckCircle size={40} className="text-white" />
@@ -170,7 +170,7 @@ export default function RegisterPage() {
           </p>
           <Link
             href="/login"
-            className="inline-flex items-center gap-2 px-6 py-3 text-white font-semibold bg-gradient-to-r from-violet-500 to-pink-500 rounded-xl hover:shadow-lg transition-all"
+            className="inline-flex items-center gap-2 px-6 py-3 text-white font-semibold bg-gradient-to-r from-slate-800 via-slate-900 to-slate-950 rounded-xl hover:shadow-lg transition-all"
           >
             <Sparkles size={18} />
             Bắt đầu học ngay
@@ -183,10 +183,10 @@ export default function RegisterPage() {
   return (
     <div className="flex min-h-screen">
       {/* Left Side - Illustration */}
-      <div className="relative flex-col items-center justify-center flex-1 hidden p-12 lg:flex bg-gradient-to-br from-violet-600 via-fuchsia-600 to-pink-600">
+      <div className="relative flex-col items-center justify-center flex-1 hidden p-12 lg:flex bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950">
         {/* Decorative elements */}
         <div className="absolute w-32 h-32 rounded-full top-10 left-10 bg-white/10 blur-2xl" />
-        <div className="absolute w-40 h-40 rounded-full bottom-20 right-10 bg-pink-400/20 blur-3xl" />
+        <div className="absolute w-40 h-40 rounded-full bottom-20 right-10 bg-slate-400/20 blur-3xl" />
         <div className="absolute w-24 h-24 rounded-full top-1/3 right-20 bg-amber-400/20 blur-2xl" />
 
         <div className="relative z-10 max-w-lg text-center text-white">
@@ -256,15 +256,15 @@ export default function RegisterPage() {
       </div>
 
       {/* Right Side - Registration Form */}
-      <div className="flex items-center justify-center flex-1 p-6 overflow-y-auto bg-gradient-to-br from-violet-50 via-white to-pink-50">
+      <div className="flex items-center justify-center flex-1 p-6 overflow-y-auto bg-gradient-to-br from-slate-50 via-white to-slate-100">
         <div className="w-full max-w-lg py-8">
           {/* Mobile Logo */}
           <div className="flex justify-center mb-6 lg:hidden">
             <Link href="/" className="flex items-center gap-2">
-              <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-pink-500">
+              <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950">
                 <GraduationCap size={24} className="text-white" />
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-violet-600 to-pink-600 bg-clip-text text-transparent">
+              <span className="text-xl font-bold bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent">
                 StudyHub
               </span>
             </Link>
@@ -272,8 +272,8 @@ export default function RegisterPage() {
 
           {/* Header */}
           <div className="mb-6 text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 mb-4 rounded-2xl bg-gradient-to-br from-violet-100 to-pink-100">
-              <UserPlus size={28} className="text-violet-600" />
+            <div className="inline-flex items-center justify-center w-16 h-16 mb-4 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200">
+              <UserPlus size={28} className="text-slate-600" />
             </div>
             <h2 className="mb-2 text-2xl font-bold text-gray-800">
               Tạo Tài Khoản Học Tập
@@ -298,7 +298,7 @@ export default function RegisterPage() {
                   value={formData.fullName}
                   onChange={handleChange}
                   placeholder="VD: Nguyễn Văn A"
-                  className={`w-full py-3 pl-12 pr-4 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all ${
+                  className={`w-full py-3 pl-12 pr-4 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all ${
                     errors.fullName ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-white'
                   }`}
                   disabled={loading}
@@ -323,7 +323,7 @@ export default function RegisterPage() {
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="email@edu.vn"
-                    className={`w-full py-3 pl-12 pr-4 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all ${
+                    className={`w-full py-3 pl-12 pr-4 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all ${
                       errors.email ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-white'
                     }`}
                     disabled={loading}
@@ -346,7 +346,7 @@ export default function RegisterPage() {
                     value={formData.university}
                     onChange={handleChange}
                     placeholder="VD: ĐH Bách Khoa"
-                    className={`w-full py-3 pl-12 pr-4 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all ${
+                    className={`w-full py-3 pl-12 pr-4 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all ${
                       errors.university ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-white'
                     }`}
                     disabled={loading}
@@ -371,8 +371,8 @@ export default function RegisterPage() {
                     onClick={() => toggleSubject(subject.id)}
                     className={`px-3 py-1.5 text-sm font-medium rounded-full border-2 transition-all ${
                       formData.subjects.includes(subject.id)
-                        ? 'bg-violet-500 text-white border-violet-500'
-                        : 'bg-white text-gray-600 border-gray-200 hover:border-violet-300'
+                        ? 'bg-slate-600 text-white border-slate-600'
+                        : 'bg-white text-gray-600 border-gray-200 hover:border-slate-300'
                     }`}
                     disabled={loading}
                   >
@@ -402,7 +402,7 @@ export default function RegisterPage() {
                     value={formData.password}
                     onChange={handleChange}
                     placeholder="Tối thiểu 6 ký tự"
-                    className={`w-full py-3 pl-12 pr-4 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all ${
+                    className={`w-full py-3 pl-12 pr-4 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all ${
                       errors.password ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-white'
                     }`}
                     disabled={loading}
@@ -425,7 +425,7 @@ export default function RegisterPage() {
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     placeholder="Nhập lại mật khẩu"
-                    className={`w-full py-3 pl-12 pr-4 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all ${
+                    className={`w-full py-3 pl-12 pr-4 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all ${
                       errors.confirmPassword ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-white'
                     }`}
                     disabled={loading}
@@ -445,16 +445,16 @@ export default function RegisterPage() {
                   name="terms"
                   checked={formData.terms}
                   onChange={handleChange}
-                  className="w-5 h-5 mt-0.5 text-violet-600 border-gray-300 rounded focus:ring-violet-500"
+                  className="w-5 h-5 mt-0.5 text-slate-600 border-gray-300 rounded focus:ring-slate-500"
                   disabled={loading}
                 />
                 <span className="text-sm text-gray-600">
                   Tôi đồng ý với{' '}
-                  <a href="#" className="font-medium text-violet-600 hover:underline">
+                  <a href="#" className="font-medium text-slate-600 hover:underline">
                     Điều khoản sử dụng
                   </a>{' '}
                   và{' '}
-                  <a href="#" className="font-medium text-violet-600 hover:underline">
+                  <a href="#" className="font-medium text-slate-600 hover:underline">
                     Chính sách bảo mật
                   </a>{' '}
                   của StudyHub
@@ -468,7 +468,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 mt-2 text-base font-semibold text-white transition-all bg-gradient-to-r from-violet-500 to-pink-500 rounded-xl shadow-lg shadow-violet-200 hover:shadow-xl hover:shadow-pink-200 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+              className="w-full py-3.5 mt-2 text-base font-semibold text-white transition-all bg-gradient-to-r from-slate-800 via-slate-900 to-slate-950 rounded-xl shadow-lg shadow-slate-200 hover:shadow-xl hover:shadow-slate-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -490,7 +490,7 @@ export default function RegisterPage() {
               Đã có tài khoản?{' '}
               <Link
                 href="/login"
-                className="font-semibold text-violet-600 hover:text-violet-800 transition-colors"
+                className="font-semibold text-slate-600 hover:text-slate-800 transition-colors"
               >
                 Đăng nhập ngay
               </Link>
@@ -498,7 +498,7 @@ export default function RegisterPage() {
             <p className="mt-3 text-sm text-gray-600">
               <Link
                 href="/"
-                className="font-medium text-gray-500 hover:text-violet-600 transition-colors"
+                className="font-medium text-gray-500 hover:text-slate-600 transition-colors"
               >
                 ← Quay lại trang chủ
               </Link>

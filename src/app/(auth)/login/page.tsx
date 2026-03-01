@@ -167,7 +167,7 @@ export default function LoginPage() {
           {/* Header */}
           <div className="mb-8 text-center">
             <div className="inline-flex items-center justify-center w-16 h-16 mb-4 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200">
-              <Lock size={28} className="text-violet-600" />
+              <Lock size={28} className="text-slate-600" />
             </div>
             <h2 className="mb-2 text-3xl font-bold text-gray-800">Đăng Nhập</h2>
             <p className="text-gray-600">
@@ -220,7 +220,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute text-gray-400 transform -translate-y-1/2 right-4 top-1/2 hover:text-violet-600 transition-colors"
+                  className="absolute text-gray-400 transform -translate-y-1/2 right-4 top-1/2 hover:text-slate-600 transition-colors"
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -234,13 +234,13 @@ export default function LoginPage() {
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
-                  className="w-4 h-4 text-violet-600 border-gray-300 rounded focus:ring-slate-500"
+                  className="w-4 h-4 text-slate-600 border-gray-300 rounded focus:ring-slate-500"
                 />
                 <span className="text-sm text-gray-600">Ghi nhớ đăng nhập</span>
               </label>
               <Link
                 href="/forgot-password"
-                className="text-sm font-medium text-violet-600 hover:text-violet-800 transition-colors"
+                className="text-sm font-medium text-slate-600 hover:text-slate-800 transition-colors"
               >
                 Quên mật khẩu?
               </Link>
@@ -249,7 +249,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 text-base font-semibold text-white transition-all bg-gradient-to-r from-violet-500 to-pink-500 rounded-xl shadow-lg shadow-violet-200 hover:shadow-xl hover:shadow-pink-200 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+              className="w-full py-3.5 text-base font-semibold text-white transition-all bg-gradient-to-r from-slate-800 via-slate-900 to-slate-950 rounded-xl shadow-lg shadow-violet-200 hover:shadow-xl hover:shadow-slate-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -268,7 +268,7 @@ export default function LoginPage() {
               Chưa có tài khoản?{' '}
               <Link
                 href="/register"
-                className="font-semibold text-violet-600 hover:text-violet-800 transition-colors"
+                className="font-semibold text-slate-600 hover:text-slate-800 transition-colors"
               >
                 Đăng ký miễn phí
               </Link>
@@ -276,7 +276,7 @@ export default function LoginPage() {
             <p className="mt-3 text-sm text-gray-600">
               <Link
                 href="/"
-                className="font-medium text-gray-500 hover:text-violet-600 transition-colors"
+                className="font-medium text-gray-500 hover:text-slate-600 transition-colors"
               >
                 ← Quay lại trang chủ
               </Link>

@@ -23,9 +23,12 @@ function initializeFirebaseAdmin() {
             privateKey = privateKey.replace(/-----BEGIN PRIVATE KEY-----/, '-----BEGIN PRIVATE KEY-----\n').replace(/-----END PRIVATE KEY-----/, '\n-----END PRIVATE KEY-----');
           }
         }
+        const storageBucket =
+          process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ||
+          `${projectId}.appspot.com`;
         admin.initializeApp({
           credential: admin.credential.cert({ projectId, clientEmail, privateKey } as admin.ServiceAccount),
-          storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+          storageBucket,
         });
         console.log('✅ Firebase Admin initialized (FIREBASE_SERVICE_ACCOUNT)');
         return;
@@ -46,11 +49,15 @@ function initializeFirebaseAdmin() {
 
       if (fs.existsSync(serviceAccountPath)) {
         const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
+        const projectId = serviceAccount.project_id || serviceAccount.projectId;
+        const storageBucket =
+          process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ||
+          `${projectId}.appspot.com`;
         admin.initializeApp({
           credential: admin.credential.cert(serviceAccount),
-          storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+          storageBucket,
         });
-        console.log('✅ Firebase Admin initialized (serviceAccountKey.json)');
+        console.log('✅ Firebase Admin initialized (serviceAccountKey.json)', { storageBucket });
         return;
       }
     } catch {
@@ -75,9 +82,12 @@ function initializeFirebaseAdmin() {
   privateKey = privateKey.replace(/\\n/g, '\n');
 
   try {
+    const storageBucket =
+      process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ||
+      `${projectId}.appspot.com`;
     admin.initializeApp({
       credential: admin.credential.cert({ projectId, clientEmail, privateKey } as admin.ServiceAccount),
-      storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+      storageBucket,
     });
     console.log('✅ Firebase Admin initialized (env vars)');
   } catch (error) {

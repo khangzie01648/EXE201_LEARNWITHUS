@@ -162,8 +162,8 @@ export default function AdminDashboardPage() {
         <div className="mt-6 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
           <div className="flex flex-col justify-between border-b border-gray-100 px-6 py-5 sm:flex-row sm:items-center">
             <div className="flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-100">
-                <TrendingUp size={20} className="text-violet-600" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100">
+                <TrendingUp size={20} className="text-slate-600" />
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-gray-800">
@@ -181,7 +181,7 @@ export default function AdminDashboardPage() {
                   onClick={() => setDateFilter(key)}
                   className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
                     dateFilter === key
-                      ? 'bg-violet-600 text-white shadow-md shadow-violet-200'
+                      ? 'bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 text-white shadow-md shadow-slate-200'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
                 >
@@ -239,7 +239,7 @@ export default function AdminDashboardPage() {
             </div>
             <div className="mt-4 flex flex-wrap gap-6 border-t border-gray-100 pt-4">
               <div className="flex items-center gap-2">
-                <div className="h-3 w-3 rounded-full bg-violet-500" />
+                <div className="h-3 w-3 rounded-full bg-slate-500" />
                 <span className="text-sm text-gray-600">Sinh viên mới đăng ký</span>
               </div>
               <div className="flex items-center gap-2">
@@ -260,7 +260,7 @@ export default function AdminDashboardPage() {
               </h3>
               <Link
                 href="/admin/users"
-                className="flex items-center gap-1 text-sm font-medium text-violet-600 hover:text-violet-700"
+                className="flex items-center gap-1 text-sm font-medium text-slate-600 hover:text-violet-700"
               >
                 Xem tất cả
                 <ArrowUpRight size={16} />
@@ -273,7 +273,7 @@ export default function AdminDashboardPage() {
                   className="flex items-center justify-between px-6 py-4 transition-colors hover:bg-gray-50/80"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-100 text-violet-600 font-semibold">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 text-slate-600 font-semibold">
                       {user.name.charAt(0)}
                     </div>
                     <div>
@@ -299,7 +299,7 @@ export default function AdminDashboardPage() {
               </h3>
               <Link
                 href="/community"
-                className="flex items-center gap-1 text-sm font-medium text-violet-600 hover:text-violet-700"
+                className="flex items-center gap-1 text-sm font-medium text-slate-600 hover:text-violet-700"
               >
                 Xem diễn đàn
                 <ArrowUpRight size={16} />
@@ -331,8 +331,8 @@ export default function AdminDashboardPage() {
         {/* Quick Stats Row */}
         <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
           <div className="flex items-center gap-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-100">
-              <ArrowUpRight size={24} className="text-violet-600" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100">
+              <ArrowUpRight size={24} className="text-slate-600" />
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-800">+24</p>

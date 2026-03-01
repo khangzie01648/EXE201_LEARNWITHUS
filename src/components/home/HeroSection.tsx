@@ -11,7 +11,7 @@ export default function HeroSection() {
 
       <div className="relative flex flex-col items-center px-4 mx-auto md:flex-row max-w-7xl sm:px-6 lg:px-8">
         <div className="mb-12 text-center md:w-1/2 md:text-left md:mb-0">
-          <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 text-sm font-medium text-violet-700 bg-violet-100 rounded-full">
+          <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 text-sm font-medium text-slate-700 bg-slate-100 rounded-full">
             <Sparkles size={16} className="text-amber-500" />
             Nền tảng học tập #1 cho sinh viên
           </div>
@@ -29,7 +29,7 @@ export default function HeroSection() {
           <div className="flex flex-col justify-center gap-4 sm:flex-row md:justify-start">
             <Link
               href="/register"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 text-white transition-all bg-gradient-to-r from-violet-500 to-pink-500 rounded-xl shadow-lg shadow-pink-200 hover:shadow-xl hover:shadow-pink-300 hover:-translate-y-0.5 font-semibold"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 text-white transition-all bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 rounded-xl shadow-lg shadow-slate-200 hover:shadow-xl hover:shadow-slate-300 hover:-translate-y-0.5 font-semibold"
             >
               <Sparkles size={18} />
               Bắt đầu miễn phí
@@ -45,7 +45,7 @@ export default function HeroSection() {
         <div className="flex justify-center md:w-1/2">
           <div className="relative w-full max-w-md">
             <div className="grid gap-4">
-              <div className="p-6 bg-white border border-violet-100 rounded-2xl shadow-lg shadow-violet-100/50">
+              <div className="p-6 bg-white border border-slate-200 rounded-2xl shadow-lg shadow-slate-100/50">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-slate-600 to-slate-800 shadow-lg shadow-slate-200">
                     <Timer size={20} className="text-white" />
@@ -55,8 +55,8 @@ export default function HeroSection() {
                     <p className="text-xl font-bold text-gray-800">24:30</p>
                   </div>
                 </div>
-                <div className="h-2.5 overflow-hidden bg-violet-100 rounded-full">
-                  <div className="w-2/3 h-full bg-gradient-to-r from-violet-500 to-pink-500 rounded-full" />
+                <div className="h-2.5 overflow-hidden bg-slate-100 rounded-full">
+                  <div className="w-2/3 h-full bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 rounded-full" />
                 </div>
               </div>
 

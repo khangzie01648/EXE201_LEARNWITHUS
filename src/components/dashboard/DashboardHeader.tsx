@@ -44,19 +44,19 @@ export default function DashboardHeader({ title }: DashboardHeaderProps) {
           <input
             type="text"
             placeholder="Tìm kiếm..."
-            className="w-56 rounded-xl border border-gray-200 py-2.5 pl-10 pr-4 text-sm transition-colors placeholder:text-gray-400 focus:border-violet-300 focus:outline-none focus:ring-2 focus:ring-violet-500/20"
+            className="w-56 rounded-xl border border-gray-200 py-2.5 pl-10 pr-4 text-sm transition-colors placeholder:text-gray-400 focus:border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-500/20"
           />
         </div>
 
         {/* Notifications */}
         <button className="relative rounded-xl p-2.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700">
           <Bell size={20} />
-          <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-rose-500" />
+          <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-slate-500" />
         </button>
 
         {/* User Menu */}
         <div className="flex cursor-pointer items-center gap-2 rounded-xl px-2 py-1.5 transition-colors hover:bg-gray-50">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-pink-500 text-sm font-semibold text-white">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 text-sm font-semibold text-white">
             {user?.userName ? getInitials(user.userName) : <User size={20} />}
           </div>
           <div className="hidden md:block text-left">
