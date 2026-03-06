@@ -111,6 +111,7 @@ export default function MentorDetailPage() {
   const mentor = mentorId ? getMentorById(mentorId) : null;
 
   const [showBookingForm, setShowBookingForm] = useState(false);
+  const [bookingType, setBookingType] = useState<'session' | 'consultation'>('consultation');
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -124,19 +125,55 @@ export default function MentorDetailPage() {
   const formatPrice = (price: number) =>
     new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
 
+  const openBookingForm = (type: 'session' | 'consultation') => {
+    setBookingType(type);
+    setShowBookingForm(true);
+    setFormData({ preferredDate: '', preferredTime: '', topic: '', note: '' });
+    setErrors({});
+  };
+
   const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: Record<string, string> = {};
     if (!formData.preferredDate) newErrors.preferredDate = 'Vui lòng chọn ngày';
     if (!formData.preferredTime) newErrors.preferredTime = 'Vui lòng chọn khung giờ';
-    if (!formData.topic.trim()) newErrors.topic = 'Vui lòng mô tả chủ đề cần tư vấn';
+    if (!formData.topic.trim()) newErrors.topic = 'Vui lòng mô tả chủ đề';
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
 
     setLoading(true);
     try {
-      await new Promise((r) => setTimeout(r, 1500));
-      setBookingSuccess(true);
+      const token = localStorage.getItem('token');
+      const scheduledAt = `${formData.preferredDate}T${formData.preferredTime.split('-')[0]}:00`;
+      const amount = mentor.pricePerSession;
+
+      if (!token) {
+        window.location.href = `/login?redirect=/mentors/${mentor.id}`;
+        return;
+      }
+
+      const res = await fetch('/api/mentor-bookings', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          mentorId: mentor.id,
+          type: bookingType,
+          amount,
+          scheduledAt,
+          topic: formData.topic.trim(),
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setBookingSuccess(true);
+      } else {
+        setErrors({ topic: data.message || 'Đặt lịch thất bại' });
+      }
+    } catch {
+      setErrors({ topic: 'Có lỗi xảy ra. Vui lòng thử lại.' });
     } finally {
       setLoading(false);
     }
@@ -228,7 +265,7 @@ export default function MentorDetailPage() {
                 <p className="text-2xl font-bold text-violet-600">
                   {formatPrice(mentor.pricePerSession)}
                 </p>
-                <p className="text-sm text-gray-500">/ buổi tư vấn (45 phút)</p>
+                <p className="text-sm text-gray-500">/ buổi (45 phút)</p>
               </div>
 
               {bookingSuccess ? (
@@ -251,6 +288,9 @@ export default function MentorDetailPage() {
                 </div>
               ) : showBookingForm ? (
                 <form onSubmit={handleBookingSubmit} className="p-6 space-y-4">
+                  <div className="rounded-xl bg-violet-50 px-4 py-2 text-sm font-medium text-violet-700">
+                    {bookingType === 'session' ? 'Đăng ký học cùng' : 'Đặt lịch tư vấn'}
+                  </div>
                   <div>
                     <label className="block mb-1.5 text-sm font-medium text-gray-700">
                       Ngày hẹn <span className="text-red-500">*</span>
@@ -342,7 +382,7 @@ export default function MentorDetailPage() {
                     )}
                   </button>
                   <p className="text-xs text-gray-500 text-center">
-                    Thanh toán qua email xác nhận. Hủy trước 24h được hoàn tiền.
+                    Thanh toán qua PayOS. Hủy trước 24h được hoàn tiền.
                   </p>
                   <button
                     type="button"
@@ -353,16 +393,23 @@ export default function MentorDetailPage() {
                   </button>
                 </form>
               ) : (
-                <div className="p-6">
+                <div className="p-6 space-y-3">
                   <button
-                    onClick={() => setShowBookingForm(true)}
+                    onClick={() => openBookingForm('session')}
                     className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-pink-500 py-3 font-semibold text-white shadow-lg transition-all hover:shadow-xl"
                   >
-                    <Calendar size={18} />
+                    <GraduationCap size={18} />
+                    Đăng ký học cùng
+                  </button>
+                  <button
+                    onClick={() => openBookingForm('consultation')}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-violet-500 py-3 font-semibold text-violet-600 transition-all hover:bg-violet-50"
+                  >
+                    <MessageSquare size={18} />
                     Đặt lịch tư vấn
                   </button>
-                  <p className="mt-4 text-center text-xs text-gray-500">
-                    Đăng nhập để đặt lịch. VIP được 2 buổi miễn phí/tháng.
+                  <p className="text-center text-xs text-gray-500">
+                    Đăng nhập để đặt lịch. Thanh toán qua PayOS.
                   </p>
                 </div>
               )}

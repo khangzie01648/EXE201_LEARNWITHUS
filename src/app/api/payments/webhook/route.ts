@@ -18,8 +18,11 @@ export async function POST(request: NextRequest) {
     
     console.log('PayOS Webhook received:', JSON.stringify(body, null, 2));
 
-    const { data, signature } = body as { 
-      data: PayOSWebhookData; 
+    const { data, signature } = body as {
+      code: string;
+      desc: string;
+      success: boolean;
+      data: PayOSWebhookData;
       signature: string;
     };
 
@@ -31,8 +34,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify signature
-    const isValid = verifyWebhookSignature(data, signature);
+    // Verify signature using PayOS SDK
+    const isValid = await verifyWebhookSignature(body);
     if (!isValid) {
       console.error('Invalid webhook signature');
       return NextResponse.json<ApiResponse<null>>(

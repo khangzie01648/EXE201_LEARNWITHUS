@@ -380,6 +380,24 @@ export interface MentorRequest extends BaseEntity {
   status: 'pending' | 'contacted' | 'matched';
 }
 
+// Mentor Booking (học cùng / tư vấn)
+export type MentorBookingType = 'session' | 'consultation';
+
+export type MentorBookingStatus = 'pending' | 'paid' | 'completed' | 'cancelled';
+
+export interface MentorBooking extends BaseEntity {
+  userId: string;
+  mentorId: string;
+  type: MentorBookingType;
+  amount: number;
+  status: MentorBookingStatus;
+  scheduledAt: Date;
+  topic: string;
+  paymentId?: string;
+  userName?: string;
+  mentorName?: string;
+}
+
 // ============================================
 // DTOs - Data Transfer Objects
 // ============================================

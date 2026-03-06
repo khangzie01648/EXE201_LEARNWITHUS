@@ -122,9 +122,10 @@ export async function POST(request: NextRequest) {
 
     const userId = await createDocument(COLLECTIONS.users, userData);
 
+    // role 1 = Admin (full admin access)
     const roleLabels: Record<UserRole, string> = {
-      [UserRole.Admin]: 'Admin',
-      [UserRole.Staff]: 'Nhân viên',
+      [UserRole.Admin]: 'Nhân viên',   // 0
+      [UserRole.Staff]: 'Admin',       // 1
       [UserRole.Client]: 'Khách hàng',
       [UserRole.Manager]: 'Quản lý',
       [UserRole.Mentor]: 'Mentor'

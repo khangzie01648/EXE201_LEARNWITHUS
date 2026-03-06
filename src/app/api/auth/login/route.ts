@@ -61,8 +61,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate JWT token
+    // Only role === 1 has full admin access (redirect to admin, manage all)
     const roleNames = ['Admin', 'Staff', 'Client', 'Manager', 'Mentor'];
     const resolveRoleName = (roleValue: unknown): string => {
+      // role 1 = Admin (full admin privileges, only this role can access admin panel)
+      if (typeof roleValue === 'number' && roleValue === 1) {
+        return 'Admin';
+      }
       if (typeof roleValue === 'number' && roleNames[roleValue]) {
         return roleNames[roleValue];
       }
@@ -71,6 +76,7 @@ export async function POST(request: NextRequest) {
         const byName = roleNames.find((name) => name.toLowerCase() === normalized);
         if (byName) return byName;
         const asNumber = Number(roleValue);
+        if (asNumber === 1) return 'Admin';
         if (!Number.isNaN(asNumber) && roleNames[asNumber]) {
           return roleNames[asNumber];
         }

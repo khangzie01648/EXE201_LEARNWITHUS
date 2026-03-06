@@ -61,11 +61,13 @@ function getInitials(name: string): string {
   return name.slice(0, 2).toUpperCase();
 }
 
+// role 1 = Admin (full admin access)
 const roleLabels: Record<number, string> = {
-  0: 'Quản trị viên',
-  1: 'Nhân viên',
+  0: 'Nhân viên',
+  1: 'Quản trị viên',
   2: 'Người dùng',
   3: 'Quản lý',
+  4: 'Mentor',
 };
 
 // ─── Success Toast ────────────────────────────────────────────

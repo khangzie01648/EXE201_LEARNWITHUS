@@ -1,19 +1,32 @@
-// PayOS Integration Helper
-// Documentation: https://payos.vn/docs
+/**
+ * PayOS Integration - Using @payos/node SDK
+ * Documentation: https://payos.vn/docs
+ * SDK: https://github.com/payOSHQ/payos-lib-node
+ */
 
-import crypto from 'crypto';
+import { PayOS } from '@payos/node';
 
-// PayOS Configuration
+// Initialize PayOS client
+const payos = new PayOS({
+  clientId: process.env.PAYOS_CLIENT_ID || '',
+  apiKey: process.env.PAYOS_API_KEY || '',
+  checksumKey: process.env.PAYOS_CHECKSUM_KEY || '',
+  baseURL: process.env.PAYOS_BASE_URL || 'https://api-merchant.payos.vn',
+  logLevel: process.env.PAYOS_LOG as 'off' | 'error' | 'warn' | 'info' | 'debug' || 'warn',
+});
+
+// PayOS Configuration (for return/cancel URLs)
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 export const PAYOS_CONFIG = {
   clientId: process.env.PAYOS_CLIENT_ID || '',
   apiKey: process.env.PAYOS_API_KEY || '',
   checksumKey: process.env.PAYOS_CHECKSUM_KEY || '',
   baseUrl: 'https://api-merchant.payos.vn',
-  returnUrl: process.env.NEXT_PUBLIC_APP_URL + '/payment/success',
-  cancelUrl: process.env.NEXT_PUBLIC_APP_URL + '/payment/cancel',
+  returnUrl: `${baseUrl}/payment/success`,
+  cancelUrl: `${baseUrl}/payment/cancel`,
 };
 
-// Payment types
+// Types (compatible with existing code)
 export interface PayOSPaymentData {
   orderCode: number;
   amount: number;
@@ -25,8 +38,7 @@ export interface PayOSPaymentData {
   items?: PayOSItem[];
   returnUrl: string;
   cancelUrl: string;
-  expiredAt?: number; // Unix timestamp
-  signature?: string;
+  expiredAt?: number;
 }
 
 export interface PayOSItem {
@@ -51,7 +63,6 @@ export interface PayOSResponse {
     checkoutUrl: string;
     qrCode: string;
   };
-  signature?: string;
 }
 
 export interface PayOSWebhookData {
@@ -77,89 +88,118 @@ export interface PayOSWebhookData {
 export function generateOrderCode(): number {
   const timestamp = Date.now();
   const random = Math.floor(Math.random() * 1000);
-  return parseInt(`${timestamp}${random}`.slice(-12));
+  return parseInt(`${timestamp}${random}`.slice(-12), 10);
 }
 
-// Create signature for PayOS request
-export function createSignature(data: Record<string, unknown>): string {
-  // Sort keys alphabetically
-  const sortedKeys = Object.keys(data).sort();
-  
-  // Build query string
-  const queryString = sortedKeys
-    .map(key => `${key}=${data[key]}`)
-    .join('&');
-  
-  // Create HMAC SHA256 signature
-  const hmac = crypto.createHmac('sha256', PAYOS_CONFIG.checksumKey);
-  hmac.update(queryString);
-  
-  return hmac.digest('hex');
+// Verify webhook signature using PayOS SDK
+export async function verifyWebhookSignature(
+  webhookBody: { code?: string; desc?: string; success?: boolean; data?: PayOSWebhookData; signature?: string }
+): Promise<boolean> {
+  if (!webhookBody?.data || !webhookBody?.signature) return false;
+  try {
+    await payos.webhooks.verify({
+      code: webhookBody.code ?? '',
+      desc: webhookBody.desc ?? '',
+      success: webhookBody.success ?? false,
+      data: webhookBody.data,
+      signature: webhookBody.signature,
+    });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
-// Verify webhook signature
-export function verifyWebhookSignature(data: PayOSWebhookData, signature: string): boolean {
-  const expectedSignature = createSignature(data as unknown as Record<string, unknown>);
-  return expectedSignature === signature;
+// Create payment link using PayOS SDK
+export async function createPaymentLink(
+  paymentData: Omit<PayOSPaymentData, 'signature'>
+): Promise<PayOSResponse> {
+  try {
+    const paymentLink = await payos.paymentRequests.create({
+      orderCode: paymentData.orderCode,
+      amount: paymentData.amount,
+      description: paymentData.description,
+      returnUrl: paymentData.returnUrl,
+      cancelUrl: paymentData.cancelUrl,
+      items: paymentData.items,
+      buyerName: paymentData.buyerName,
+      buyerEmail: paymentData.buyerEmail,
+      buyerPhone: paymentData.buyerPhone,
+      buyerAddress: paymentData.buyerAddress,
+      expiredAt: paymentData.expiredAt,
+    });
+
+    return {
+      code: '00',
+      desc: 'success',
+      data: {
+        bin: paymentLink.bin,
+        accountNumber: paymentLink.accountNumber,
+        accountName: paymentLink.accountName,
+        amount: paymentLink.amount,
+        description: paymentLink.description,
+        orderCode: paymentLink.orderCode,
+        currency: paymentLink.currency,
+        paymentLinkId: paymentLink.paymentLinkId,
+        status: paymentLink.status,
+        checkoutUrl: paymentLink.checkoutUrl,
+        qrCode: paymentLink.qrCode,
+      },
+    };
+  } catch (err) {
+    const error = err as { code?: string; desc?: string; message?: string };
+    return {
+      code: error.code || '99',
+      desc: error.desc || error.message || 'Lỗi tạo thanh toán',
+    };
+  }
 }
 
-// Create payment link
-export async function createPaymentLink(paymentData: Omit<PayOSPaymentData, 'signature'>): Promise<PayOSResponse> {
-  // Create signature
-  const dataForSignature = {
-    amount: paymentData.amount,
-    cancelUrl: paymentData.cancelUrl,
-    description: paymentData.description,
-    orderCode: paymentData.orderCode,
-    returnUrl: paymentData.returnUrl,
-  };
-  
-  const signature = createSignature(dataForSignature);
-  
-  const requestBody = {
-    ...paymentData,
-    signature,
-  };
-  
-  const response = await fetch(`${PAYOS_CONFIG.baseUrl}/v2/payment-requests`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-client-id': PAYOS_CONFIG.clientId,
-      'x-api-key': PAYOS_CONFIG.apiKey,
-    },
-    body: JSON.stringify(requestBody),
-  });
-  
-  return response.json();
-}
-
-// Get payment info
+// Get payment info using PayOS SDK
 export async function getPaymentInfo(orderCode: number): Promise<PayOSResponse> {
-  const response = await fetch(`${PAYOS_CONFIG.baseUrl}/v2/payment-requests/${orderCode}`, {
-    method: 'GET',
-    headers: {
-      'x-client-id': PAYOS_CONFIG.clientId,
-      'x-api-key': PAYOS_CONFIG.apiKey,
-    },
-  });
-  
-  return response.json();
+  try {
+    const paymentLink = await payos.paymentRequests.get(orderCode);
+    return {
+      code: '00',
+      desc: 'success',
+      data: {
+        bin: '',
+        accountNumber: '',
+        accountName: '',
+        amount: paymentLink.amount,
+        description: '',
+        orderCode: paymentLink.orderCode,
+        currency: 'VND',
+        paymentLinkId: paymentLink.id,
+        status: paymentLink.status,
+        checkoutUrl: '',
+        qrCode: '',
+      },
+    };
+  } catch (err) {
+    const error = err as { code?: string; desc?: string; message?: string };
+    return {
+      code: error.code || '99',
+      desc: error.desc || error.message || 'Lỗi lấy thông tin thanh toán',
+    };
+  }
 }
 
-// Cancel payment link
-export async function cancelPaymentLink(orderCode: number, reason?: string): Promise<PayOSResponse> {
-  const response = await fetch(`${PAYOS_CONFIG.baseUrl}/v2/payment-requests/${orderCode}/cancel`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-client-id': PAYOS_CONFIG.clientId,
-      'x-api-key': PAYOS_CONFIG.apiKey,
-    },
-    body: JSON.stringify({ cancellationReason: reason || 'User cancelled' }),
-  });
-  
-  return response.json();
+// Cancel payment link using PayOS SDK
+export async function cancelPaymentLink(
+  orderCode: number,
+  reason?: string
+): Promise<PayOSResponse> {
+  try {
+    await payos.paymentRequests.cancel(orderCode, reason || 'User cancelled');
+    return { code: '00', desc: 'success' };
+  } catch (err) {
+    const error = err as { code?: string; desc?: string; message?: string };
+    return {
+      code: error.code || '99',
+      desc: error.desc || error.message || 'Lỗi hủy thanh toán',
+    };
+  }
 }
 
 // Calculate deposit amount (30% of total)

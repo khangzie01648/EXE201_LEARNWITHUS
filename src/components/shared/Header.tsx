@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Crown, GraduationCap, LogOut, Menu, User, X, BookOpen, Users } from 'lucide-react';
+import { Crown, GraduationCap, LogOut, Menu, User, X, BookOpen, Users, Shield } from 'lucide-react';
 
 const navLinks = [
   { href: '/', label: 'Trang chủ' },
@@ -154,6 +154,16 @@ export default function Header() {
 
                     {/* Menu items */}
                     <div className="py-1">
+                      {userInfo.role === 'Admin' && (
+                        <Link
+                          href="/admin/dashboard"
+                          onClick={() => setIsAvatarOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-slate-50 hover:text-slate-700 transition-colors"
+                        >
+                          <Shield size={18} />
+                          Trang quản trị
+                        </Link>
+                      )}
                       <Link
                         href="/profile"
                         onClick={() => setIsAvatarOpen(false)}
@@ -273,6 +283,16 @@ export default function Header() {
                       {userInfo.userName}
                     </span>
                   </div>
+                  {userInfo.role === 'Admin' && (
+                    <Link
+                      href="/admin/dashboard"
+                      className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-slate-50 hover:text-slate-700 rounded-lg"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <Shield size={18} />
+                      Trang quản trị
+                    </Link>
+                  )}
                   <Link
                     href="/profile"
                     className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-slate-50 hover:text-slate-700 rounded-lg"

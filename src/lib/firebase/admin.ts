@@ -142,6 +142,7 @@ export const COLLECTIONS = {
   communityPosts: 'communityPosts',
   communityComments: 'communityComments',
   mentorRequests: 'mentorRequests',
+  mentorBookings: 'mentorBookings',
 } as const;
 
 export default admin;

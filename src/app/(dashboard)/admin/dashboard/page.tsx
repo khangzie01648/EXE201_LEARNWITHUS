@@ -117,7 +117,7 @@ export default function AdminDashboardPage() {
 
       <div className="p-6">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           <StatsCard
             title="Sinh viên"
             value={stats.users}
@@ -150,6 +150,22 @@ export default function AdminDashboardPage() {
             change="+8%"
             changeType="increase"
           />
+          <Link href="/admin/mentor-bookings" className="block">
+            <StatsCard
+              title="Đơn đặt lịch Mentor"
+              value="Xem"
+              icon={GraduationCap}
+              color="indigo"
+            />
+          </Link>
+          <Link href="/admin/revenue" className="block">
+            <StatsCard
+              title="Doanh thu"
+              value="Xem"
+              icon={TrendingUp}
+              color="green"
+            />
+          </Link>
           <StatsCard
             title="Pomodoro đang chạy"
             value={stats.activeSessions}
@@ -298,10 +314,10 @@ export default function AdminDashboardPage() {
                 Bài viết mới trên cộng đồng
               </h3>
               <Link
-                href="/community"
+                href="/admin/posts"
                 className="flex items-center gap-1 text-sm font-medium text-slate-600 hover:text-violet-700"
               >
-                Xem diễn đàn
+                Xem tất cả
                 <ArrowUpRight size={16} />
               </Link>
             </div>

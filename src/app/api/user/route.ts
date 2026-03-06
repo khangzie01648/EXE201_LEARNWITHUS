@@ -5,10 +5,10 @@ import { adminDb, COLLECTIONS } from '@/lib/firebase/admin';
 import { verifyToken } from '@/lib/utils';
 import { User, ApiResponse, UserRole } from '@/types';
 
-// Role names mapping
+// Role names mapping - role 1 = Admin (full admin access)
 const roleNames: Record<UserRole, string> = {
-  [UserRole.Admin]: 'Admin',
-  [UserRole.Staff]: 'Staff',
+  [UserRole.Admin]: 'Staff',   // 0
+  [UserRole.Staff]: 'Admin',   // 1 = Admin
   [UserRole.Client]: 'Client',
   [UserRole.Manager]: 'Manager',
   [UserRole.Mentor]: 'Mentor'

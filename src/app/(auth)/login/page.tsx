@@ -31,7 +31,17 @@ export default function LoginPage() {
     const token = localStorage.getItem('token');
     const user = localStorage.getItem('user');
     if (token && user) {
-      router.replace('/');
+      try {
+        const parsed = JSON.parse(user) as { role?: string };
+        // role 1 = Admin: redirect to admin dashboard
+        if (parsed.role === 'Admin') {
+          router.replace('/admin/dashboard');
+        } else {
+          router.replace('/');
+        }
+      } catch {
+        router.replace('/');
+      }
     }
   }, [router]);
 
@@ -83,7 +93,12 @@ export default function LoginPage() {
         avatarUrl: loginData.avatarUrl,
       }));
 
-      router.push('/');
+      // role 1 = Admin: redirect to admin dashboard
+      if (loginData.role === 'Admin') {
+        router.push('/admin/dashboard');
+      } else {
+        router.push('/');
+      }
     } catch (error) {
       setErrors({
         password: error instanceof Error ? error.message : 'Đăng nhập thất bại',
