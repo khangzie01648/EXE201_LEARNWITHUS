@@ -10,7 +10,12 @@ interface MentorRequestDto {
   userId?: string;
   fullName: string;
   email: string;
+  phone?: string;
   subject: string;
+  experience?: string;
+  availability?: string;
+  pricePerSession?: number;
+  bio?: string;
   goal: string;
   status: string;
   createdAt: string;
@@ -150,6 +155,12 @@ export default function AdminMentorRequestsPage() {
                   Môn học
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                  Kinh nghiệm
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                  Giá/buổi
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
                   Ngày gửi
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
@@ -163,7 +174,7 @@ export default function AdminMentorRequestsPage() {
             <tbody className="divide-y divide-gray-50">
               {requests.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
                     Chưa có yêu cầu Mentor nào
                   </td>
                 </tr>
@@ -175,6 +186,12 @@ export default function AdminMentorRequestsPage() {
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">{req.email}</td>
                     <td className="px-6 py-4 text-sm text-gray-600">{req.subject}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{req.experience || '—'}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">
+                      {req.pricePerSession
+                        ? new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(req.pricePerSession)
+                        : '—'}
+                    </td>
                     <td className="px-6 py-4 text-sm text-gray-600">
                       {formatDate(req.createdAt)}
                     </td>

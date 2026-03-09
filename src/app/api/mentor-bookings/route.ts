@@ -1,4 +1,7 @@
-// GET /api/mentor-bookings - List mentor bookings (Admin only, with filters)
+// GET /api/mentor-bookings - List mentor bookings
+//   Admin: all bookings (with filters)
+//   Mentor: bookings where mentorId = userId
+//   Student: bookings where userId = userId
 // POST /api/mentor-bookings - Create mentor booking (user books mentor)
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -10,8 +13,6 @@ import type { ApiResponse, MentorBooking, MentorBookingType } from '@/types';
 
 function serializeBooking(doc: FirebaseFirestore.DocumentSnapshot): MentorBooking & { id: string; createdAt: string; scheduledAt: string } {
   const data = doc.data() as Record<string, unknown>;
-  const createdAt = data.createdAt;
-  const scheduledAt = data.scheduledAt;
   const toStr = (v: unknown): string => {
     if (v instanceof Timestamp) return v.toDate().toISOString();
     if (v && typeof v === 'object' && '_seconds' in (v as object)) {
@@ -23,9 +24,10 @@ function serializeBooking(doc: FirebaseFirestore.DocumentSnapshot): MentorBookin
   return {
     ...data,
     id: (data.id as string) ?? doc.id,
-    createdAt: toStr(createdAt),
+    createdAt: toStr(data.createdAt),
     updatedAt: data.updatedAt ? toStr(data.updatedAt) : undefined,
-    scheduledAt: toStr(scheduledAt),
+    scheduledAt: toStr(data.scheduledAt),
+    cancelledAt: data.cancelledAt ? toStr(data.cancelledAt) : undefined,
   } as MentorBooking & { id: string; createdAt: string; scheduledAt: string };
 }
 
@@ -45,26 +47,71 @@ export async function GET(request: NextRequest) {
         { status: 401 }
       );
     }
-    if (payload.role !== 'Admin') {
-      return NextResponse.json<ApiResponse<null>>(
-        { data: null, message: 'Không có quyền truy cập', statusCode: 403 },
-        { status: 403 }
-      );
-    }
 
     const { searchParams } = new URL(request.url);
     const typeFilter = searchParams.get('type') as MentorBookingType | null;
     const mentorId = searchParams.get('mentorId');
     const from = searchParams.get('from');
     const to = searchParams.get('to');
+    const role = searchParams.get('role'); // 'mentor' | 'student' | null (admin)
 
-    let query = adminDb
-      .collection(COLLECTIONS.mentorBookings)
-      .orderBy('scheduledAt', 'desc')
-      .limit(200);
+    const isAdmin = payload.role === 'Admin';
+    const isMentor = role === 'mentor';
+    const isStudent = role === 'student';
 
-    const snapshot = await query.get();
+    let snapshot;
+    if (isAdmin) {
+      snapshot = await adminDb
+        .collection(COLLECTIONS.mentorBookings)
+        .limit(500)
+        .get();
+    } else if (isMentor) {
+      snapshot = await adminDb
+        .collection(COLLECTIONS.mentorBookings)
+        .where('mentorId', '==', payload.userId)
+        .limit(500)
+        .get();
+    } else if (isStudent) {
+      snapshot = await adminDb
+        .collection(COLLECTIONS.mentorBookings)
+        .where('userId', '==', payload.userId)
+        .limit(500)
+        .get();
+    } else if (!isAdmin) {
+      const profileSnap = await adminDb
+        .collection(COLLECTIONS.mentorProfiles)
+        .where('userId', '==', payload.userId)
+        .limit(1)
+        .get();
+
+      if (!profileSnap.empty) {
+        snapshot = await adminDb
+          .collection(COLLECTIONS.mentorBookings)
+          .where('mentorId', '==', payload.userId)
+          .limit(500)
+          .get();
+      } else {
+        snapshot = await adminDb
+          .collection(COLLECTIONS.mentorBookings)
+          .where('userId', '==', payload.userId)
+          .limit(500)
+          .get();
+      }
+    } else {
+      snapshot = await adminDb
+        .collection(COLLECTIONS.mentorBookings)
+        .limit(500)
+        .get();
+    }
+
     let bookings = snapshot.docs.map(serializeBooking);
+
+    // Sort in-memory (avoids composite index requirement)
+    bookings.sort((a, b) => {
+      const da = a.scheduledAt ? new Date(a.scheduledAt).getTime() : 0;
+      const db = b.scheduledAt ? new Date(b.scheduledAt).getTime() : 0;
+      return db - da;
+    });
 
     if (typeFilter && (typeFilter === 'session' || typeFilter === 'consultation')) {
       bookings = bookings.filter((b) => b.type === typeFilter);
@@ -88,20 +135,30 @@ export async function GET(request: NextRequest) {
     const sessionCount = bookings.filter((b) => b.type === 'session').length;
     const consultationCount = bookings.filter((b) => b.type === 'consultation').length;
 
+    // Enrich with user/mentor names
     const mentorIds = [...new Set(bookings.map((b) => b.mentorId))];
-    const mentorMap: Record<string, string> = {};
-    if (mentorIds.length > 0) {
-      const refs = mentorIds.map((id) => adminDb.collection(COLLECTIONS.users).doc(id));
-      const userDocs = await adminDb.getAll(...refs);
-      userDocs.forEach((doc) => {
-        const u = doc.data() as { fullName?: string } | undefined;
-        if (u?.fullName) mentorMap[doc.id] = u.fullName;
-      });
+    const userIds = [...new Set(bookings.map((b) => b.userId))];
+    const allIds = [...new Set([...mentorIds, ...userIds])];
+    const nameMap: Record<string, string> = {};
+    if (allIds.length > 0) {
+      const chunks = [];
+      for (let i = 0; i < allIds.length; i += 10) {
+        chunks.push(allIds.slice(i, i + 10));
+      }
+      for (const chunk of chunks) {
+        const refs = chunk.map((uid) => adminDb.collection(COLLECTIONS.users).doc(uid));
+        const userDocs = await adminDb.getAll(...refs);
+        userDocs.forEach((doc) => {
+          const u = doc.data() as { fullName?: string } | undefined;
+          if (u?.fullName) nameMap[doc.id] = u.fullName;
+        });
+      }
     }
 
     const enriched = bookings.map((b) => ({
       ...b,
-      mentorName: mentorMap[b.mentorId] || b.mentorName || '—',
+      mentorName: nameMap[b.mentorId] || b.mentorName || '—',
+      userName: nameMap[b.userId] || b.userName || '—',
     }));
 
     return NextResponse.json<ApiResponse<{
@@ -142,7 +199,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { mentorId, type, amount, scheduledAt, topic } = body;
+    const { mentorId, type, amount, scheduledAt, topic, note } = body;
 
     if (!mentorId?.trim()) {
       return NextResponse.json<ApiResponse<null>>(
@@ -176,12 +233,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const mentorDoc = await adminDb.collection(COLLECTIONS.users).doc(mentorId).get();
-    if (!mentorDoc.exists) {
-      return NextResponse.json<ApiResponse<null>>(
-        { data: null, message: 'Mentor không tồn tại', statusCode: 404 },
-        { status: 404 }
-      );
+    // Validate mentor exists (check mentorProfiles first, then users)
+    const profileSnap = await adminDb
+      .collection(COLLECTIONS.mentorProfiles)
+      .where('userId', '==', mentorId)
+      .limit(1)
+      .get();
+
+    let mentorName = '';
+    if (!profileSnap.empty) {
+      mentorName = (profileSnap.docs[0].data() as { fullName?: string })?.fullName || '';
+    } else {
+      const mentorDoc = await adminDb.collection(COLLECTIONS.users).doc(mentorId).get();
+      if (!mentorDoc.exists) {
+        return NextResponse.json<ApiResponse<null>>(
+          { data: null, message: 'Mentor không tồn tại', statusCode: 404 },
+          { status: 404 }
+        );
+      }
+      mentorName = (mentorDoc.data() as { fullName?: string })?.fullName || '';
     }
 
     const id = generateId();
@@ -197,8 +267,9 @@ export async function POST(request: NextRequest) {
       status: 'pending',
       scheduledAt: Timestamp.fromDate(scheduled),
       topic: topic.trim(),
+      note: note?.trim() || '',
       userName: payload.userName,
-      mentorName: (mentorDoc.data() as { fullName?: string })?.fullName,
+      mentorName,
       createdAt: now,
       updatedAt: now,
     });

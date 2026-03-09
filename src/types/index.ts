@@ -226,6 +226,9 @@ export const VIP_PLANS: Record<VipPlanId, VipPlan> = {
   yearly:    { id: 'yearly',    name: '1 năm',       price: 799000, durationDays: 365 },
 };
 
+// Revenue source types for admin revenue dashboard
+export type RevenueSourceType = 'vip_upgrade' | 'mentor_upgrade' | 'mentor_session' | 'mentor_consultation' | 'test_booking';
+
 // Payment
 export type PaymentFor = 'test_booking' | 'mentor_booking' | 'vip_upgrade';
 
@@ -407,18 +410,61 @@ export interface CommunityComment extends BaseEntity {
 }
 
 // Mentor Request
+export type MentorRequestStatus = 'pending' | 'approved' | 'denied';
+
 export interface MentorRequest extends BaseEntity {
+  userId: string;
   fullName: string;
   email: string;
+  phone?: string;
   subject: string;
+  experience?: string;
+  availability?: string;
+  pricePerSession?: number;
+  bio?: string;
   goal: string;
-  status: 'pending' | 'contacted' | 'matched';
+  status: MentorRequestStatus;
+  approvedBy?: string;
+  approvedAt?: Date;
+}
+
+// Mentor Profile (created when admin approves a mentor request)
+export interface MentorProfile extends BaseEntity {
+  userId: string;
+  fullName: string;
+  email: string;
+  phone?: string;
+  subject: string;
+  subjects: string[];
+  experience?: string;
+  availability: string[];
+  pricePerSession: number;
+  bio?: string;
+  avatarUrl?: string;
+  company?: string;
+  university?: string;
+  title?: string;
+  rating: number;
+  reviewCount: number;
+  sessionCount: number;
+  menteeCount: number;
+  isActive: boolean;
+}
+
+// Mentor Review
+export interface MentorReview extends BaseEntity {
+  mentorId: string;
+  userId: string;
+  bookingId: string;
+  rating: number;
+  comment: string;
+  userName?: string;
 }
 
 // Mentor Booking (học cùng / tư vấn)
 export type MentorBookingType = 'session' | 'consultation';
 
-export type MentorBookingStatus = 'pending' | 'paid' | 'completed' | 'cancelled';
+export type MentorBookingStatus = 'pending' | 'confirmed' | 'paid' | 'completed' | 'cancelled';
 
 export interface MentorBooking extends BaseEntity {
   userId: string;
@@ -428,9 +474,17 @@ export interface MentorBooking extends BaseEntity {
   status: MentorBookingStatus;
   scheduledAt: Date;
   topic: string;
+  note?: string;
   paymentId?: string;
   userName?: string;
   mentorName?: string;
+  reviewId?: string;
+  cancelledAt?: Date;
+  cancelledBy?: string;
+  cancelReason?: string;
+  mentorPaid?: boolean;
+  mentorPaidAt?: Date;
+  completedAt?: Date;
 }
 
 // ============================================
@@ -493,6 +547,7 @@ export interface UserProfileResponse {
   address: string;
   role: string;
   isActive: boolean;
+  isMentor?: boolean;
   createdAt: Date;
 }
 

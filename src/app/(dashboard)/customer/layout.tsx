@@ -1,13 +1,18 @@
 'use client';
 
 import { Sidebar } from '@/components/dashboard';
-import { Calendar, FileText, User, History } from 'lucide-react';
+import { Calendar, FileText, User, History, GraduationCap } from 'lucide-react';
 
 const customerSidebarItems = [
   {
     icon: Calendar,
     heading: 'Lịch xét nghiệm',
     href: '/customer/bookings',
+  },
+  {
+    icon: GraduationCap,
+    heading: 'Lịch hẹn Mentor',
+    href: '/customer/mentor-bookings',
   },
   {
     icon: FileText,

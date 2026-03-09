@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { Header, Footer } from '@/components/shared';
 import {
@@ -12,159 +12,144 @@ import {
   MessageSquare,
   ChevronRight,
   Filter,
+  Loader2,
+  Star,
 } from 'lucide-react';
+import type { MentorProfile } from '@/types';
 
-// Mock mentors data - structure inspired by Mentori.vn
-const mockMentors = [
-  {
-    id: 'm1',
-    name: 'Nguyễn Minh Tuấn',
-    title: 'Senior Developer',
-    company: 'FPT Software',
-    subject: 'Lập trình Web',
-    university: 'ĐH Bách Khoa HN',
-    rating: 4.9,
-    menteeCount: 48,
-    sessionCount: 156,
-    pricePerSession: 150000,
-    avatar: 'NT',
-    bio: '5 năm kinh nghiệm phát triển web. Chuyên React, Node.js, TypeScript. Từng làm việc tại các startup công nghệ.',
-    topics: ['Lập trình Web', 'React', 'Node.js', 'TypeScript'],
-    availableSlot: '19:00, 02/03/2026',
-    isInactive: false,
-  },
-  {
-    id: 'm2',
-    name: 'Trần Thị Hương',
-    title: 'Giảng viên Toán',
-    company: 'ĐH Khoa học Tự nhiên',
-    subject: 'Toán rời rạc',
-    university: 'ĐH Khoa học Tự nhiên',
-    rating: 4.8,
-    menteeCount: 32,
-    sessionCount: 98,
-    pricePerSession: 120000,
-    avatar: 'TH',
-    bio: 'Thạc sĩ Toán học. Ôn thi cuối kỳ, luyện tư duy logic và giải bài tập.',
-    topics: ['Toán rời rạc', 'Ôn thi', 'Tư duy logic'],
-    availableSlot: '18:00, 03/03/2026',
-    isInactive: true,
-  },
-  {
-    id: 'm3',
-    name: 'Lê Văn Đức',
-    title: 'Research Scientist',
-    company: 'VinAI',
-    subject: 'Trí tuệ nhân tạo',
-    university: 'ĐH Công nghệ',
-    rating: 5.0,
-    menteeCount: 24,
-    sessionCount: 67,
-    pricePerSession: 200000,
-    avatar: 'ĐL',
-    bio: 'Nghiên cứu sinh AI. Hướng dẫn Machine Learning, Deep Learning, Python.',
-    topics: ['AI', 'Machine Learning', 'Deep Learning', 'Python'],
-    availableSlot: '14:00, 04/03/2026',
-    isInactive: false,
-  },
-  {
-    id: 'm4',
-    name: 'Phạm Thu Hà',
-    title: 'IELTS Trainer',
-    company: 'British Council',
-    subject: 'IELTS',
-    university: 'ĐH Ngoại ngữ',
-    rating: 4.7,
-    menteeCount: 56,
-    sessionCount: 189,
-    pricePerSession: 180000,
-    avatar: 'HP',
-    bio: 'IELTS 8.5. Chuyên Writing & Speaking. Luyện thi cấp tốc.',
-    topics: ['IELTS', 'Writing', 'Speaking', 'Luyện thi'],
-    availableSlot: '19:00, 01/03/2026',
-    isInactive: false,
-  },
-  {
-    id: 'm5',
-    name: 'Hoàng Minh Quân',
-    title: 'Database Architect',
-    company: 'Viettel Solutions',
-    subject: 'Cơ sở dữ liệu',
-    university: 'ĐH Bách Khoa',
-    rating: 4.9,
-    menteeCount: 41,
-    sessionCount: 112,
-    pricePerSession: 130000,
-    avatar: 'QH',
-    bio: 'DBA 3 năm. SQL, MongoDB, thiết kế database, tối ưu truy vấn.',
-    topics: ['SQL', 'MongoDB', 'Database Design'],
-    availableSlot: '18:00, 05/03/2026',
-    isInactive: false,
-  },
-];
-
-const categoryChips = [
-  'Finance & Banking',
-  'Marketing & Sales',
-  'Accounting & Audit',
-  'Supply Chain',
-  'Human Resources',
-  'Management Consulting',
-  'Công nghệ thông tin',
-  'Giáo dục',
-];
-
-const subjectTags = [
+// Môn học khớp với form đăng ký mentor
+const subjectFilterOptions = [
   'Lập trình Web',
   'Toán rời rạc',
-  'AI',
-  'IELTS',
+  'Trí tuệ nhân tạo',
   'Cơ sở dữ liệu',
-  'React',
-  'Node.js',
-  'Machine Learning',
-  'Python',
-  'Ôn thi',
-  'Kỹ năng mềm',
-  'Định hướng nghề nghiệp',
+  'IELTS',
+  'Kinh tế học',
+  'Vật lý',
+  'Hóa học',
 ];
 
-const topicOptions = [
-  'Định hướng và chia sẻ kinh nghiệm nghề nghiệp',
-  'Hoạt động ngoại khóa / Học bổng du học / Cuộc thi',
-  'Kỹ năng mềm',
-  'Chủ đề bất kỳ',
-  'Khác',
+const sortOptions = [
+  { value: 'rating', label: 'Đánh giá cao nhất' },
+  { value: 'price_asc', label: 'Giá thấp đến cao' },
+  { value: 'price_desc', label: 'Giá cao đến thấp' },
+  { value: 'sessions', label: 'Nhiều buổi nhất' },
+];
+
+const dayFilterOptions = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ nhật'];
+const timeFilterOptions = [
+  { value: 'Sáng', label: 'Sáng (8h-12h)' },
+  { value: 'Chiều', label: 'Chiều (13h-17h)' },
+  { value: 'Tối', label: 'Tối (18h-21h)' },
 ];
 
 export default function MentorsPage() {
+  const [mentors, setMentors] = useState<MentorProfile[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [activeTopic, setActiveTopic] = useState('');
+  const [activeSubject, setActiveSubject] = useState<string | null>(null);
+  const [filterDay, setFilterDay] = useState<string | null>(null);
+  const [filterTime, setFilterTime] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState('rating');
   const [showFilters, setShowFilters] = useState(false);
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
-  const [mentorBadge, setMentorBadge] = useState('all');
+  const [isMentor, setIsMentor] = useState<boolean | null>(null);
 
   const formatPrice = (price: number) =>
     new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
 
-  const filteredMentors = mockMentors.filter((m) => {
-    const matchSearch =
-      !searchQuery ||
-      m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      m.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      m.topics.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()));
-    const matchCategory = !activeCategory || m.topics.some((t) => t.includes(activeCategory));
-    return matchSearch && matchCategory;
-  });
+  // Check if current user is already a mentor (to hide "Đăng ký làm Mentor" CTA)
+  useEffect(() => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    if (!token) {
+      setIsMentor(false);
+      return;
+    }
+    const checkMentor = async () => {
+      try {
+        const res = await fetch('/api/user/me', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (res.ok && data.data) {
+          setIsMentor((data.data as { isMentor?: boolean }).isMentor ?? false);
+        } else {
+          setIsMentor(false);
+        }
+      } catch {
+        setIsMentor(false);
+      }
+    };
+    checkMentor();
+  }, []);
+
+  useEffect(() => {
+    const fetchMentors = async () => {
+      setLoading(true);
+      try {
+        const params = new URLSearchParams();
+        params.set('limit', '500');
+        if (searchQuery) params.set('search', searchQuery);
+        if (activeSubject) params.set('subject', activeSubject);
+        const res = await fetch(`/api/mentors?${params}`);
+        const data = await res.json();
+        setMentors(Array.isArray(data.data) ? data.data : []);
+      } catch (err) {
+        console.error('Failed to fetch mentors:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const debounce = setTimeout(fetchMentors, 300);
+    return () => clearTimeout(debounce);
+  }, [searchQuery, activeSubject]);
+
+  const filteredAndSortedMentors = useMemo(() => {
+    let list = [...mentors];
+
+    // Lọc theo ngày rảnh
+    if (filterDay) {
+      list = list.filter((m) => {
+        const avail = Array.isArray(m.availability) ? m.availability : (m.availability ? String(m.availability).split(',') : []);
+        return avail.some((s: string) => s.trim().startsWith(filterDay));
+      });
+    }
+
+    // Lọc theo thời gian rảnh
+    if (filterTime) {
+      list = list.filter((m) => {
+        const avail = Array.isArray(m.availability) ? m.availability : (m.availability ? String(m.availability).split(',') : []);
+        return avail.some((s: string) => s.includes(filterTime));
+      });
+    }
+
+    // Sắp xếp
+    switch (sortBy) {
+      case 'price_asc':
+        return list.sort((a, b) => (a.pricePerSession || 0) - (b.pricePerSession || 0));
+      case 'price_desc':
+        return list.sort((a, b) => (b.pricePerSession || 0) - (a.pricePerSession || 0));
+      case 'sessions':
+        return list.sort((a, b) => (b.sessionCount || 0) - (a.sessionCount || 0));
+      default:
+        return list.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    }
+  }, [mentors, filterDay, filterTime, sortBy]);
+
+  const getInitials = (name: string) => {
+    const parts = name.split(' ');
+    if (parts.length >= 2) {
+      return parts[parts.length - 2][0] + parts[parts.length - 1][0];
+    }
+    return name.slice(0, 2).toUpperCase();
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
 
       <main>
-        {/* Hero - Mentori style */}
+        {/* Hero */}
         <section className="bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 py-16 md:py-20">
           <div className="px-4 mx-auto max-w-[1800px] sm:px-6 lg:px-8 xl:px-12 2xl:px-16 text-center">
             <h1 className="mb-4 text-3xl font-bold text-white md:text-4xl lg:text-5xl">
@@ -176,45 +161,29 @@ export default function MentorsPage() {
           </div>
         </section>
 
-        {/* Category chips - horizontal scroll */}
+        {/* Môn học filter chips */}
         <section className="border-b border-gray-200 bg-white">
           <div className="px-4 py-4 mx-auto max-w-[1800px] sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
-            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-              {categoryChips.map((cat) => (
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setActiveSubject(null)}
+                className={`flex-shrink-0 px-4 py-2 text-sm font-medium rounded-full whitespace-nowrap transition-all ${
+                  !activeSubject ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                Tất cả
+              </button>
+              {subjectFilterOptions.map((subj) => (
                 <button
-                  key={cat}
-                  onClick={() => setActiveCategory(activeCategory === cat ? null : cat)}
+                  key={subj}
+                  onClick={() => setActiveSubject(activeSubject === subj ? null : subj)}
                   className={`flex-shrink-0 px-4 py-2 text-sm font-medium rounded-full whitespace-nowrap transition-all ${
-                    activeCategory === cat
+                    activeSubject === subj
                       ? 'bg-slate-800 text-white'
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                   }`}
                 >
-                  {cat}
-                </button>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Subject tags */}
-        <section className="border-b border-gray-200 bg-white/80">
-          <div className="px-4 py-3 mx-auto max-w-[1800px] sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
-            <p className="mb-2 text-xs font-medium text-slate-500 uppercase tracking-wider">
-              Chủ đề
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {subjectTags.map((tag) => (
-                <button
-                  key={tag}
-                  onClick={() => setSearchQuery((q) => (q === tag ? '' : tag))}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
-                    searchQuery === tag
-                      ? 'bg-slate-800 text-white'
-                      : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200'
-                  }`}
-                >
-                  {tag}
+                  {subj}
                 </button>
               ))}
             </div>
@@ -231,7 +200,7 @@ export default function MentorsPage() {
               />
               <input
                 type="text"
-                placeholder="Tìm kiếm"
+                placeholder="Tìm kiếm mentor theo tên, môn học..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full py-3 pl-12 pr-4 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
@@ -240,7 +209,7 @@ export default function MentorsPage() {
           </div>
         </section>
 
-        {/* Main content - Sidebar + Mentor list */}
+        {/* Main content */}
         <div className="w-full px-4 py-6 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
           <div className="mx-auto flex max-w-[1800px] flex-col gap-6 lg:flex-row">
             {/* Sidebar filters */}
@@ -260,71 +229,62 @@ export default function MentorsPage() {
                 <div className={`space-y-5 ${showFilters ? 'block' : 'hidden lg:block'}`}>
                   <div>
                     <label className="mb-2 block text-sm font-medium text-slate-700">
-                      Chọn Chủ đề
+                      Ngày rảnh
                     </label>
                     <select
-                      value={activeTopic}
-                      onChange={(e) => setActiveTopic(e.target.value)}
+                      value={filterDay ?? ''}
+                      onChange={(e) => setFilterDay(e.target.value || null)}
                       className="w-full min-w-0 rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500"
                     >
                       <option value="">Tất cả</option>
-                      {topicOptions.map((opt) => (
-                        <option key={opt} value={opt}>
-                          {opt}
+                      {dayFilterOptions.map((d) => (
+                        <option key={d} value={d}>{d}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-700">
+                      Thời gian rảnh
+                    </label>
+                    <select
+                      value={filterTime ?? ''}
+                      onChange={(e) => setFilterTime(e.target.value || null)}
+                      className="w-full min-w-0 rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500"
+                    >
+                      <option value="">Tất cả</option>
+                      {timeFilterOptions.map((t) => (
+                        <option key={t.value} value={t.value}>{t.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-700">
+                      Sắp xếp theo
+                    </label>
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value)}
+                      className="w-full min-w-0 rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500"
+                    >
+                      {sortOptions.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
                         </option>
                       ))}
                     </select>
                   </div>
 
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
-                      Lịch rảnh
-                    </label>
-                    <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center">
-                      <input
-                        type="date"
-                        value={dateFrom}
-                        onChange={(e) => setDateFrom(e.target.value)}
-                        className="min-w-0 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
-                      />
-                      <span className="flex-shrink-0 px-1 text-center text-xs text-slate-400">
-                        đến
-                      </span>
-                      <input
-                        type="date"
-                        value={dateTo}
-                        onChange={(e) => setDateTo(e.target.value)}
-                        className="min-w-0 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
-                      Loại Mentor
-                    </label>
-                    <div className="flex flex-wrap gap-2">
-                      {[
-                        { value: 'all', label: 'Tất cả Mentor' },
-                        { value: 'expert', label: 'Expert' },
-                      ].map(({ value, label }) => (
-                        <button
-                          key={value}
-                          onClick={() => setMentorBadge(value)}
-                          className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-                            mentorBadge === value
-                              ? 'bg-slate-800 text-white'
-                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                          }`}
-                        >
-                          {label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <button className="w-full rounded-lg bg-slate-800 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-700">
-                    Áp dụng
+                  <button
+                    onClick={() => {
+                      setSearchQuery('');
+                      setActiveSubject(null);
+                      setFilterDay(null);
+                      setFilterTime(null);
+                      setSortBy('rating');
+                    }}
+                    className="w-full rounded-lg bg-slate-800 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-700"
+                  >
+                    Xóa bộ lọc
                   </button>
                 </div>
               </div>
@@ -334,101 +294,126 @@ export default function MentorsPage() {
             <div className="flex-1 min-w-0">
               <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
                 <h2 className="text-lg font-semibold text-slate-800">
-                  Tìm thấy {filteredMentors.length} Mentor cho bạn!
+                  {loading ? 'Đang tải...' : `Tìm thấy ${filteredAndSortedMentors.length} Mentor cho bạn!`}
                 </h2>
-                <button className="flex items-center gap-1 text-sm font-medium text-slate-600 hover:text-slate-800 lg:hidden">
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="flex items-center gap-1 text-sm font-medium text-slate-600 hover:text-slate-800 lg:hidden"
+                >
                   <Filter size={16} />
                   Lọc kết quả
                 </button>
               </div>
 
-              <div className="space-y-4">
-                {filteredMentors.map((mentor) => (
-                  <Link
-                    key={mentor.id}
-                    href={`/mentors/${mentor.id}`}
-                    className="block overflow-hidden rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-all hover:shadow-md hover:border-slate-300"
-                  >
-                    <div className="flex flex-col gap-4 sm:flex-row">
-                      <div className="flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-600 to-slate-800 text-2xl font-bold text-white">
-                        {mentor.avatar}
-                      </div>
-
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-start justify-between gap-2">
-                          <div>
-                            <h3 className="font-semibold text-slate-800 group-hover:text-slate-600">
-                              {mentor.name}
-                            </h3>
-                            <p className="text-sm text-slate-600">
-                              {mentor.title} tại {mentor.company}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-2 text-xs text-slate-500">
-                            <Calendar size={14} />
-                            <span>Lịch rảnh: {mentor.availableSlot}</span>
-                          </div>
-                        </div>
-
-                        <div className="mt-2 flex items-center gap-4 text-sm text-slate-500">
-                          <span className="flex items-center gap-1">
-                            <Users size={14} />
-                            {mentor.menteeCount} mentee
-                          </span>
-                          <span>—</span>
-                          <span className="flex items-center gap-1">
-                            <MessageSquare size={14} />
-                            {mentor.sessionCount}
-                          </span>
-                        </div>
-
-                        {mentor.isInactive && (
-                          <div className="mt-2 inline-block rounded-lg bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">
-                            Cố vấn này đã lâu ngày không hoạt động.
+              {loading ? (
+                <div className="flex items-center justify-center py-20">
+                  <Loader2 size={32} className="animate-spin text-slate-400" />
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {filteredAndSortedMentors.map((mentor) => (
+                    <Link
+                      key={mentor.id}
+                      href={`/mentors/${mentor.id}`}
+                      className="block overflow-hidden rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-all hover:shadow-md hover:border-slate-300"
+                    >
+                      <div className="flex flex-col gap-4 sm:flex-row">
+                        {mentor.avatarUrl ? (
+                          <img
+                            src={mentor.avatarUrl}
+                            alt={mentor.fullName}
+                            className="h-20 w-20 flex-shrink-0 rounded-2xl object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-600 to-slate-800 text-2xl font-bold text-white">
+                            {getInitials(mentor.fullName)}
                           </div>
                         )}
 
-                        <div className="mt-3">
-                          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                            Giới thiệu bản thân
-                          </p>
-                          <p className="mt-1 line-clamp-2 text-sm text-slate-600">
-                            {mentor.bio}
-                          </p>
-                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-start justify-between gap-2">
+                            <div>
+                              <h3 className="font-semibold text-slate-800">
+                                {mentor.fullName}
+                              </h3>
+                              <p className="text-sm text-slate-600">
+                                {mentor.title ? `${mentor.title}` : ''}{' '}
+                                {mentor.company ? `tại ${mentor.company}` : ''}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-lg font-bold text-slate-700">
+                                {formatPrice(mentor.pricePerSession)}
+                              </p>
+                              <p className="text-xs text-slate-500">/ buổi</p>
+                            </div>
+                          </div>
 
-                        <div className="mt-3">
-                          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                            Chủ đề Mentoring
-                          </p>
-                          <div className="mt-1 flex flex-wrap gap-1">
-                            {mentor.topics.slice(0, 4).map((topic) => (
-                              <span
-                                key={topic}
-                                className="rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-600"
-                              >
-                                {topic}
-                              </span>
-                            ))}
-                            {mentor.topics.length > 4 && (
-                              <span className="text-xs text-slate-400">
-                                +{mentor.topics.length - 4}
+                          <div className="mt-2 flex items-center gap-4 text-sm text-slate-500">
+                            {mentor.rating > 0 && (
+                              <span className="flex items-center gap-1 text-amber-500">
+                                <Star size={14} className="fill-amber-500" />
+                                {mentor.rating.toFixed(1)}
+                                <span className="text-slate-400">({mentor.reviewCount})</span>
                               </span>
                             )}
+                            <span className="flex items-center gap-1">
+                              <Users size={14} />
+                              {mentor.menteeCount} mentee
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <MessageSquare size={14} />
+                              {mentor.sessionCount} buổi
+                            </span>
+                          </div>
+
+                          {mentor.bio && (
+                            <div className="mt-3">
+                              <p className="line-clamp-2 text-sm text-slate-600">{mentor.bio}</p>
+                            </div>
+                          )}
+
+                          <div className="mt-3">
+                            <div className="flex flex-wrap gap-1">
+                              {(mentor.subjects ?? []).slice(0, 4).map((s) => (
+                                <span
+                                  key={s}
+                                  className="rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-600"
+                                >
+                                  {s}
+                                </span>
+                              ))}
+                              {(mentor.subjects ?? []).length > 4 && (
+                                <span className="text-xs text-slate-400">
+                                  +{mentor.subjects.length - 4}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          {(() => {
+                            const avail = Array.isArray(mentor.availability) ? mentor.availability : [];
+                            return avail.length > 0 && (
+                              <div className="mt-2 flex items-center gap-1 text-xs text-slate-500">
+                                <Calendar size={12} />
+                                Lịch rảnh: {avail.slice(0, 3).join(', ')}
+                                {avail.length > 3 && '...'}
+                              </div>
+                            );
+                          })()}
+
+                          <div className="mt-3 flex items-center gap-1 text-sm font-medium text-slate-700 hover:text-slate-900">
+                            Xem chi tiết
+                            <ChevronRight size={16} />
                           </div>
                         </div>
-
-                        <div className="mt-4 flex items-center gap-1 text-sm font-medium text-slate-700 hover:text-slate-900">
-                          Xem chi tiết
-                          <ChevronRight size={16} />
-                        </div>
                       </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
 
-              {filteredMentors.length === 0 && (
+              {!loading && filteredAndSortedMentors.length === 0 && (
                 <div className="py-16 text-center">
                   <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
                     <GraduationCap size={32} className="text-slate-400" />
@@ -440,24 +425,26 @@ export default function MentorsPage() {
                 </div>
               )}
 
-              {/* CTA - Become Mentor */}
-              <div className="mt-12 overflow-hidden rounded-2xl bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 p-8 text-white">
-                <div className="flex flex-col items-center gap-6 md:flex-row md:justify-between">
-                  <div>
-                    <h3 className="text-xl font-bold">Bạn muốn trở thành Mentor?</h3>
-                    <p className="mt-2 text-slate-300">
-                      Đăng ký ngay để chia sẻ kiến thức và nhận thu nhập từ việc tư vấn sinh viên.
-                    </p>
+              {/* CTA - Become Mentor (ẩn nếu user đã là mentor) */}
+              {!isMentor && (
+                <div className="mt-12 overflow-hidden rounded-2xl bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 p-8 text-white">
+                  <div className="flex flex-col items-center gap-6 md:flex-row md:justify-between">
+                    <div>
+                      <h3 className="text-xl font-bold">Bạn muốn trở thành Mentor?</h3>
+                      <p className="mt-2 text-slate-300">
+                        Đăng ký ngay để chia sẻ kiến thức và nhận thu nhập từ việc tư vấn sinh viên.
+                      </p>
+                    </div>
+                    <Link
+                      href="/mentor/register"
+                      className="flex items-center gap-2 rounded-xl bg-white px-6 py-3 font-semibold text-slate-800 shadow-lg transition-all hover:bg-slate-100"
+                    >
+                      <BookOpen size={20} />
+                      Đăng ký làm Mentor
+                    </Link>
                   </div>
-                  <Link
-                    href="/mentor/register"
-                    className="flex items-center gap-2 rounded-xl bg-white px-6 py-3 font-semibold text-slate-800 shadow-lg transition-all hover:bg-slate-100"
-                  >
-                    <BookOpen size={20} />
-                    Đăng ký làm Mentor
-                  </Link>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>

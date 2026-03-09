@@ -3,7 +3,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb, COLLECTIONS } from '@/lib/firebase/admin';
 import { verifyToken } from '@/lib/utils';
-import { FieldValue } from 'firebase-admin/firestore';
 import type { ApiResponse } from '@/types';
 
 export interface MentorRequestDto {
@@ -11,7 +10,12 @@ export interface MentorRequestDto {
   userId?: string;
   fullName: string;
   email: string;
+  phone?: string;
   subject: string;
+  experience?: string;
+  availability?: string;
+  pricePerSession?: number;
+  bio?: string;
   goal: string;
   status: string;
   createdAt: Date;
@@ -66,7 +70,12 @@ export async function GET(request: NextRequest) {
         userId: d.userId,
         fullName: d.fullName,
         email: d.email,
+        phone: d.phone || '',
         subject: d.subject,
+        experience: d.experience || '',
+        availability: d.availability || '',
+        pricePerSession: d.pricePerSession || 0,
+        bio: d.bio || '',
         goal: d.goal || '',
         status: d.status,
         createdAt,

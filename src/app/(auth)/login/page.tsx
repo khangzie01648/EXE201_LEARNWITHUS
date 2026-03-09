@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import bcrypt from 'bcryptjs';
 import { 
   BookOpen, 
   Eye, 
@@ -13,7 +14,10 @@ import {
   MessageSquare, 
   Sparkles,
   Timer, 
-  Users 
+  Users,
+  Hash,
+  Copy,
+  Check,
 } from 'lucide-react';
 
 export default function LoginPage() {
@@ -25,6 +29,12 @@ export default function LoginPage() {
   });
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const router = useRouter();
+
+  // Hash generator for Firestore passwordHash (dev tool)
+  const [hashInput, setHashInput] = useState('123456');
+  const [hashResult, setHashResult] = useState<string | null>(null);
+  const [hashLoading, setHashLoading] = useState(false);
+  const [hashCopied, setHashCopied] = useState(false);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -105,6 +115,30 @@ export default function LoginPage() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGenerateHash = async () => {
+    setHashLoading(true);
+    setHashResult(null);
+    try {
+      const hash = await bcrypt.hash(hashInput, 10);
+      setHashResult(hash);
+    } catch {
+      setHashResult('Lỗi tạo hash');
+    } finally {
+      setHashLoading(false);
+    }
+  };
+
+  const handleCopyHash = async () => {
+    if (!hashResult) return;
+    try {
+      await navigator.clipboard.writeText(hashResult);
+      setHashCopied(true);
+      setTimeout(() => setHashCopied(false), 2000);
+    } catch {
+      setHashResult(null);
     }
   };
 

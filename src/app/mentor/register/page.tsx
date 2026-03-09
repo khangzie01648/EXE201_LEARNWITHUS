@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Header, Footer } from '@/components/shared';
 import {
@@ -11,6 +11,8 @@ import {
   Clock,
   Users,
   Sparkles,
+  Plus,
+  X,
 } from 'lucide-react';
 
 const subjectOptions = [
@@ -24,6 +26,21 @@ const subjectOptions = [
   'Hóa học',
   'Khác',
 ];
+
+const dayLabels = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ nhật'];
+const timeSlotLabels = ['Sáng (8h-12h)', 'Chiều (13h-17h)', 'Tối (18h-21h)'];
+
+function formatPriceVN(value: string): string {
+  const digits = value.replace(/\D/g, '');
+  if (!digits) return '';
+  const num = parseInt(digits, 10);
+  return num.toLocaleString('vi-VN');
+}
+
+function parsePriceVN(value: string): number {
+  const digits = value.replace(/\D/g, '');
+  return digits ? parseInt(digits, 10) : 0;
+}
 
 const benefits = [
   { icon: DollarSign, text: 'Thu nhập từ mỗi buổi tư vấn' },
@@ -40,17 +57,52 @@ export default function MentorRegisterPage() {
     email: '',
     phone: '',
     subject: '',
+    subjectOther: '',
     experience: '',
     availability: '',
     bio: '',
     pricePerSession: '',
   });
+  const [selectedDay, setSelectedDay] = useState('');
+  const [selectedTime, setSelectedTime] = useState('');
+
+  // Auto-fill Họ và tên, Email, Số điện thoại from logged-in user
+  useEffect(() => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    if (!token) return;
+
+    const fetchProfile = async () => {
+      try {
+        const res = await fetch('/api/user/me', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (res.ok && data.data) {
+          const profile = data.data as { fullName?: string; email?: string; phone?: string };
+          setFormData((prev) => ({
+            ...prev,
+            fullName: profile.fullName || prev.fullName,
+            email: profile.email || prev.email,
+            phone: profile.phone || prev.phone,
+          }));
+        }
+      } catch {
+        // Ignore - user can still fill manually
+      }
+    };
+    fetchProfile();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    const subjectValue = formData.subject === 'Khác' ? formData.subjectOther.trim() : formData.subject;
     if (!formData.fullName.trim() || !formData.email.trim() || !formData.subject) {
       setError('Vui lòng điền đầy đủ thông tin bắt buộc');
+      return;
+    }
+    if (formData.subject === 'Khác' && !formData.subjectOther.trim()) {
+      setError('Vui lòng nhập môn học / lĩnh vực khi chọn Khác');
       return;
     }
 
@@ -71,8 +123,13 @@ export default function MentorRegisterPage() {
         body: JSON.stringify({
           fullName: formData.fullName.trim(),
           email: formData.email.trim(),
-          subject: formData.subject,
-          goal: formData.bio || formData.experience || '',
+          phone: formData.phone.trim(),
+          subject: subjectValue,
+          experience: formData.experience.trim(),
+          availability: formData.availability.trim(),
+          pricePerSession: parsePriceVN(formData.pricePerSession),
+          bio: formData.bio.trim(),
+          goal: formData.bio.trim() || formData.experience.trim() || '',
         }),
       });
       const data = await res.json();
@@ -220,6 +277,15 @@ export default function MentorRegisterPage() {
                       <option key={s} value={s}>{s}</option>
                     ))}
                   </select>
+                  {formData.subject === 'Khác' && (
+                    <input
+                      type="text"
+                      value={formData.subjectOther}
+                      onChange={(e) => setFormData({ ...formData, subjectOther: e.target.value })}
+                      placeholder="Nhập môn học / lĩnh vực của bạn"
+                      className="mt-3 w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
+                    />
+                  )}
                 </div>
                 <div>
                   <label className="block mb-1.5 text-sm font-medium text-gray-700">
@@ -237,24 +303,107 @@ export default function MentorRegisterPage() {
                   <label className="block mb-1.5 text-sm font-medium text-gray-700">
                     Lịch rảnh (ước tính)
                   </label>
-                  <input
-                    type="text"
-                    value={formData.availability}
-                    onChange={(e) => setFormData({ ...formData, availability: e.target.value })}
-                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
-                    placeholder="VD: T2, T4, T6 tối 19h-21h"
-                  />
+                  <p className="mb-2 text-xs text-gray-500">
+                    Chọn thứ và thời gian, sau đó bấm Thêm để thêm vào danh sách
+                  </p>
+                  <div className="flex flex-wrap items-end gap-2">
+                    <div className="flex-1 min-w-[120px]">
+                      <label className="mb-1 block text-xs text-gray-500">Thứ</label>
+                      <select
+                        value={selectedDay}
+                        onChange={(e) => setSelectedDay(e.target.value)}
+                        className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
+                      >
+                        <option value="">Chọn thứ</option>
+                        {dayLabels.map((d) => (
+                          <option key={d} value={d}>{d}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex-1 min-w-[140px]">
+                      <label className="mb-1 block text-xs text-gray-500">Thời gian</label>
+                      <select
+                        value={selectedTime}
+                        onChange={(e) => setSelectedTime(e.target.value)}
+                        className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
+                      >
+                        <option value="">Chọn giờ</option>
+                        {timeSlotLabels.map((t) => (
+                          <option key={t} value={t}>{t}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!selectedDay || !selectedTime) return;
+                        const slot = `${selectedDay} - ${selectedTime}`;
+                        const current = formData.availability
+                          .split(',')
+                          .map((s) => s.trim())
+                          .filter(Boolean);
+                        if (current.includes(slot)) return;
+                        setFormData({
+                          ...formData,
+                          availability: [...current, slot].join(', '),
+                        });
+                      }}
+                      disabled={!selectedDay || !selectedTime}
+                      className="flex items-center gap-1.5 rounded-lg bg-slate-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Plus size={16} />
+                      Thêm
+                    </button>
+                  </div>
+                  {formData.availability && (
+                    <div className="mt-3 rounded-lg border border-gray-200 bg-slate-50/50 p-3">
+                      <p className="mb-2 text-xs font-medium text-gray-600">Khung giờ rảnh đã chọn:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {formData.availability
+                          .split(',')
+                          .map((s) => s.trim())
+                          .filter(Boolean)
+                          .map((slot) => (
+                            <span
+                              key={slot}
+                              className="inline-flex items-center gap-1.5 rounded-full bg-slate-200 px-3 py-1.5 text-sm text-slate-800"
+                            >
+                              {slot}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const current = formData.availability
+                                    .split(',')
+                                    .map((x) => x.trim())
+                                    .filter(Boolean);
+                                  const next = current.filter((x) => x !== slot).join(', ');
+                                  setFormData({ ...formData, availability: next });
+                                }}
+                                className="rounded-full p-0.5 hover:bg-slate-300"
+                                aria-label="Xóa"
+                              >
+                                <X size={14} />
+                              </button>
+                            </span>
+                          ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <div>
                   <label className="block mb-1.5 text-sm font-medium text-gray-700">
                     Giá đề xuất / buổi (VNĐ)
                   </label>
                   <input
-                    type="number"
-                    value={formData.pricePerSession}
-                    onChange={(e) => setFormData({ ...formData, pricePerSession: e.target.value })}
+                    type="text"
+                    inputMode="numeric"
+                    value={formatPriceVN(formData.pricePerSession)}
+                    onChange={(e) => {
+                      const raw = e.target.value.replace(/\D/g, '');
+                      setFormData({ ...formData, pricePerSession: raw });
+                    }}
+                    placeholder="VD: 150.000"
                     className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
-                    placeholder="VD: 150000"
                   />
                 </div>
                 <div>

@@ -143,6 +143,8 @@ export const COLLECTIONS = {
   communityComments: 'communityComments',
   mentorRequests: 'mentorRequests',
   mentorBookings: 'mentorBookings',
+  mentorProfiles: 'mentorProfiles',
+  mentorReviews: 'mentorReviews',
   pomodoroSessions: 'pomodoroSessions',
 } as const;
 

@@ -10,7 +10,6 @@ import { UserRole } from '@/types';
 
 export async function POST(request: NextRequest) {
   try {
-    // Auth required - user must be logged in to register as mentor
     const authHeader = request.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
       return NextResponse.json<ApiResponse<null>>(
@@ -29,9 +28,8 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { fullName, email, subject, goal } = body;
+    const { fullName, email, phone, subject, experience, availability, pricePerSession, bio, goal } = body;
 
-    // Validate
     if (!fullName?.trim()) {
       return NextResponse.json<ApiResponse<null>>(
         { data: null, message: 'Vui lòng nhập họ tên', statusCode: 400 },
@@ -51,7 +49,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if user is already Mentor
     const userDoc = await adminDb.collection(COLLECTIONS.users).doc(payload.userId).get();
     if (userDoc.exists) {
       const user = userDoc.data();
@@ -63,7 +60,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Check if user already has pending mentor request
     const existingSnapshot = await adminDb
       .collection(COLLECTIONS.mentorRequests)
       .where('userId', '==', payload.userId)
@@ -80,14 +76,22 @@ export async function POST(request: NextRequest) {
 
     const now = FieldValue.serverTimestamp();
     const id = generateId();
+    const price = typeof pricePerSession === 'number'
+      ? pricePerSession
+      : parseInt(String(pricePerSession || '0'), 10) || 0;
 
     await adminDb.collection(COLLECTIONS.mentorRequests).doc(id).set({
       id,
       userId: payload.userId,
       fullName: fullName.trim(),
       email: email.trim(),
+      phone: phone?.trim() || '',
       subject: subject.trim(),
-      goal: goal?.trim() || '',
+      experience: experience?.trim() || '',
+      availability: availability?.trim() || '',
+      pricePerSession: price,
+      bio: bio?.trim() || '',
+      goal: goal?.trim() || bio?.trim() || '',
       status: 'pending',
       createdAt: now,
       updatedAt: now,

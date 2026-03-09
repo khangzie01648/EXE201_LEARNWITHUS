@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { adminDb, COLLECTIONS } from '@/lib/firebase/admin';
 import { verifyToken } from '@/lib/utils';
 import { User, ApiResponse, UserRole } from '@/types';
+import { Timestamp } from 'firebase-admin/firestore';
 
 // Role names mapping - role 1 = Admin (full admin access)
 const roleNames: Record<UserRole, string> = {
@@ -23,6 +24,9 @@ interface UserListDto {
   address: string;
   role: string;
   isActive: boolean;
+  isVip: boolean;
+  vipPlan: string | null;
+  vipExpiresAt: string | null;
   createdAt: Date;
 }
 
@@ -61,10 +65,9 @@ export async function GET(request: NextRequest) {
     const roleFilter = searchParams.get('role');
     const isActiveFilter = searchParams.get('isActive');
 
-    // Build query
+    // Build query (no orderBy to avoid composite index requirement)
     let query: FirebaseFirestore.Query = adminDb.collection(COLLECTIONS.users);
 
-    // Apply filters
     if (roleFilter !== null) {
       const roleValue = parseInt(roleFilter);
       if (!isNaN(roleValue) && roleValue in UserRole) {
@@ -76,13 +79,22 @@ export async function GET(request: NextRequest) {
       query = query.where('isActive', '==', isActiveFilter === 'true');
     }
 
-    // Order by creation date
-    query = query.orderBy('createdAt', 'desc');
-
     const snapshot = await query.get();
 
+    const now = new Date();
     const users: UserListDto[] = snapshot.docs.map(doc => {
       const data = doc.data() as User;
+
+      let vipExpiresAt: Date | null = null;
+      if (data.vipExpiresAt) {
+        vipExpiresAt = data.vipExpiresAt instanceof Timestamp
+          ? (data.vipExpiresAt as unknown as Timestamp).toDate()
+          : data.vipExpiresAt instanceof Date
+            ? data.vipExpiresAt
+            : new Date(data.vipExpiresAt as unknown as string);
+      }
+      const isVip = !!(vipExpiresAt && vipExpiresAt > now);
+
       return {
         id: data.id,
         fullName: data.fullName,
@@ -91,11 +103,17 @@ export async function GET(request: NextRequest) {
         address: data.address,
         role: roleNames[data.role] || 'Client',
         isActive: data.isActive,
+        isVip,
+        vipPlan: isVip ? ((data as unknown as Record<string, unknown>).vipPlan as string) ?? null : null,
+        vipExpiresAt: vipExpiresAt ? vipExpiresAt.toISOString() : null,
         createdAt: data.createdAt instanceof Date 
           ? data.createdAt 
           : (data.createdAt as FirebaseFirestore.Timestamp).toDate()
       };
     });
+
+    // Sort in-memory (avoids composite index)
+    users.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
     return NextResponse.json<ApiResponse<UserListDto[]>>(
       { data: users, message: 'Lấy danh sách người dùng thành công', statusCode: 200 },

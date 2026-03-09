@@ -56,6 +56,14 @@ export async function GET(request: NextRequest) {
 
     const user = userDoc.data() as User;
 
+    // Check if user has mentor profile (is already a mentor)
+    const mentorProfileSnap = await adminDb
+      .collection(COLLECTIONS.mentorProfiles)
+      .where('userId', '==', auth.userId)
+      .limit(1)
+      .get();
+    const isMentor = !mentorProfileSnap.empty || roleNames[user.role] === 'Mentor';
+
     // Don't expose passwordHash
     const profile: UserProfileResponse = {
       id: user.id,
@@ -65,6 +73,7 @@ export async function GET(request: NextRequest) {
       address: user.address,
       role: roleNames[user.role] || 'Client',
       isActive: user.isActive,
+      isMentor,
       createdAt: user.createdAt instanceof Date 
         ? user.createdAt 
         : (user.createdAt as FirebaseFirestore.Timestamp).toDate()

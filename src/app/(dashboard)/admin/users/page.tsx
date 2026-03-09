@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { DashboardHeader } from '@/components/dashboard';
 import { Loading } from '@/components/shared';
-import { RefreshCcw, UserCheck, UserX, Pencil, Trash2, X } from 'lucide-react';
+import { RefreshCcw, UserCheck, UserX, Pencil, Trash2, X, Crown } from 'lucide-react';
 
 interface UserDto {
   id: string;
@@ -13,6 +13,9 @@ interface UserDto {
   address: string;
   role: string;
   isActive: boolean;
+  isVip: boolean;
+  vipPlan: string | null;
+  vipExpiresAt: string | null;
   createdAt: string | Date;
 }
 
@@ -266,21 +269,37 @@ export default function AdminUsersPage() {
                   <tr key={user.id} className="hover:bg-gray-50/50">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600 font-semibold">
-                          {user.fullName?.charAt(0) || '?'}
+                        <div className={`flex h-10 w-10 items-center justify-center rounded-xl font-semibold ${
+                          user.isVip
+                            ? 'bg-gradient-to-br from-amber-100 to-amber-200 text-amber-700 ring-2 ring-amber-300'
+                            : 'bg-slate-100 text-slate-600'
+                        }`}>
+                          {user.isVip ? <Crown size={18} /> : (user.fullName?.charAt(0) || '?')}
                         </div>
                         <div>
                           <p className="font-medium text-gray-800">{user.fullName}</p>
-                          <p className="text-xs text-gray-500">{user.address || '-'}</p>
+                          <p className="text-xs text-gray-500">
+                            {user.isVip && user.vipExpiresAt
+                              ? `VIP đến ${formatDate(user.vipExpiresAt)}`
+                              : user.address || '-'}
+                          </p>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">{user.email}</td>
                     <td className="px-6 py-4 text-sm text-gray-600">{user.phone || '-'}</td>
                     <td className="px-6 py-4">
-                      <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
-                        {roleLabels[user.role] || user.role}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
+                          {roleLabels[user.role] || user.role}
+                        </span>
+                        {user.isVip && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-700">
+                            <Crown size={12} />
+                            VIP
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <span

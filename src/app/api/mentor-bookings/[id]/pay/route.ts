@@ -68,12 +68,29 @@ export async function POST(request: NextRequest, context: RouteContext) {
     }
 
     // Kiểm tra xem đã có payment pending chưa (tránh tạo trùng)
-    const existingPayment = await adminDb
-      .collection(COLLECTIONS.payments)
-      .where('mentorBookingId', '==', id)
-      .where('status', '==', PaymentStatus.Pending)
-      .limit(1)
-      .get();
+    let existingPayment;
+    try {
+      existingPayment = await adminDb
+        .collection(COLLECTIONS.payments)
+        .where('mentorBookingId', '==', id)
+        .where('status', '==', PaymentStatus.Pending)
+        .limit(1)
+        .get();
+    } catch {
+      // Fallback: query without composite index
+      const allPayments = await adminDb
+        .collection(COLLECTIONS.payments)
+        .where('mentorBookingId', '==', id)
+        .limit(10)
+        .get();
+      const pendingDocs = allPayments.docs.filter(
+        (doc) => doc.data().status === PaymentStatus.Pending
+      );
+      existingPayment = {
+        empty: pendingDocs.length === 0,
+        docs: pendingDocs,
+      };
+    }
 
     if (!existingPayment.empty) {
       const existingDoc = existingPayment.docs[0];

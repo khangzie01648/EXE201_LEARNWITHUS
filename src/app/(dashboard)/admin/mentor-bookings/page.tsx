@@ -11,6 +11,9 @@ import {
   TrendingUp,
   BookOpen,
   CreditCard,
+  Banknote,
+  CheckCircle,
+  Loader2,
 } from 'lucide-react';
 
 interface MentorBookingDto {
@@ -25,6 +28,7 @@ interface MentorBookingDto {
   scheduledAt: string;
   topic: string;
   paymentId?: string;
+  mentorPaid?: boolean;
 }
 
 interface Summary {
@@ -48,6 +52,7 @@ export default function AdminMentorBookingsPage() {
   const [mentorFilter, setMentorFilter] = useState<string>('');
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
+  const [payingMentor, setPayingMentor] = useState<string | null>(null);
 
   const fetchData = async () => {
     setLoading(true);
@@ -107,6 +112,27 @@ export default function AdminMentorBookingsPage() {
     fetchData();
   }, [typeFilter, mentorFilter]);
 
+  const handlePayMentor = async (bookingId: string) => {
+    if (!confirm('Xác nhận đã thanh toán cho mentor đơn này?')) return;
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    setPayingMentor(bookingId);
+    try {
+      const res = await fetch(`/api/mentor-bookings/${bookingId}`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mentorPaid: true }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        fetchData();
+      } else {
+        alert(data.message || 'Có lỗi xảy ra');
+      }
+    } catch { alert('Có lỗi xảy ra'); }
+    finally { setPayingMentor(null); }
+  };
+
   const formatPrice = (n: number) =>
     new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n);
 
@@ -131,6 +157,7 @@ export default function AdminMentorBookingsPage() {
 
   const statusLabels: Record<string, string> = {
     pending: 'Chờ thanh toán',
+    confirmed: 'Đã xác nhận',
     paid: 'Đã thanh toán',
     completed: 'Hoàn thành',
     cancelled: 'Đã hủy',
@@ -138,6 +165,8 @@ export default function AdminMentorBookingsPage() {
 
   const platformShare = summary ? Math.round(summary.totalRevenue * 0.2) : 0;
   const mentorShare = summary ? Math.round(summary.totalRevenue * 0.8) : 0;
+  const paidToMentorCount = bookings.filter((b) => b.mentorPaid).length;
+  const unpaidMentorCount = bookings.filter((b) => b.status === 'completed' && !b.mentorPaid).length;
 
   return (
     <div className="p-6">
@@ -260,51 +289,72 @@ export default function AdminMentorBookingsPage() {
             </div>
           )}
 
+          {/* Mentor payment summary */}
+          {(paidToMentorCount > 0 || unpaidMentorCount > 0) && (
+            <div className="mt-4 flex flex-wrap gap-3">
+              {unpaidMentorCount > 0 && (
+                <div className="inline-flex items-center gap-2 rounded-xl border border-orange-200 bg-orange-50 px-4 py-2 text-sm font-medium text-orange-700">
+                  <Banknote size={16} />
+                  {unpaidMentorCount} đơn chờ thanh toán cho mentor
+                </div>
+              )}
+              {paidToMentorCount > 0 && (
+                <div className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700">
+                  <CheckCircle size={16} />
+                  {paidToMentorCount} đơn đã thanh toán mentor
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Table */}
           <div className="mt-6 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
             <table className="w-full">
               <thead className="border-b border-gray-100 bg-gray-50">
                 <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                  <th className="px-4 py-4 text-left text-sm font-semibold text-gray-700">
                     Người đặt
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                  <th className="px-4 py-4 text-left text-sm font-semibold text-gray-700">
                     Mentor
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                  <th className="px-4 py-4 text-left text-sm font-semibold text-gray-700">
                     Loại
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                  <th className="px-4 py-4 text-left text-sm font-semibold text-gray-700">
                     Chủ đề
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                  <th className="px-4 py-4 text-left text-sm font-semibold text-gray-700">
                     Số tiền
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                  <th className="px-4 py-4 text-left text-sm font-semibold text-gray-700">
                     Trạng thái
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                  <th className="px-4 py-4 text-left text-sm font-semibold text-gray-700">
                     Ngày hẹn
+                  </th>
+                  <th className="px-4 py-4 text-right text-sm font-semibold text-gray-700">
+                    TT Mentor
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {bookings.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
+                    <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
                       {error ? 'Không có dữ liệu' : 'Chưa có đơn đặt lịch nào'}
                     </td>
                   </tr>
                 ) : (
                   bookings.map((b) => (
                     <tr key={b.id} className="hover:bg-gray-50/50">
-                      <td className="px-6 py-4 text-sm text-gray-800">
+                      <td className="px-4 py-4 text-sm text-gray-800">
                         {b.userName || b.userId}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-800">
+                      <td className="px-4 py-4 text-sm text-gray-800">
                         {b.mentorName || b.mentorId}
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-4">
                         <span
                           className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium ${
                             b.type === 'session'
@@ -320,30 +370,57 @@ export default function AdminMentorBookingsPage() {
                           {typeLabels[b.type] || b.type}
                         </span>
                       </td>
-                      <td className="max-w-xs truncate px-6 py-4 text-sm text-gray-600">
+                      <td className="max-w-xs truncate px-4 py-4 text-sm text-gray-600">
                         {b.topic || '—'}
                       </td>
-                      <td className="px-6 py-4 font-semibold text-emerald-600">
+                      <td className="px-4 py-4 font-semibold text-emerald-600">
                         {formatPrice(b.amount)}
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-4">
                         <span
                           className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${
                             b.status === 'completed' || b.status === 'paid'
                               ? 'bg-emerald-100 text-emerald-700'
-                              : b.status === 'cancelled'
-                                ? 'bg-gray-100 text-gray-600'
-                                : 'bg-amber-100 text-amber-700'
+                              : b.status === 'confirmed'
+                                ? 'bg-blue-100 text-blue-700'
+                                : b.status === 'cancelled'
+                                  ? 'bg-gray-100 text-gray-600'
+                                  : 'bg-amber-100 text-amber-700'
                           }`}
                         >
                           {statusLabels[b.status] || b.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
+                      <td className="px-4 py-4 text-sm text-gray-600">
                         <span className="inline-flex items-center gap-1">
                           <Calendar size={14} />
                           {formatDate(b.scheduledAt)}
                         </span>
+                      </td>
+                      <td className="px-4 py-4 text-right">
+                        {b.status === 'completed' && !b.mentorPaid ? (
+                          <button
+                            onClick={() => handlePayMentor(b.id)}
+                            disabled={payingMentor === b.id}
+                            className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+                          >
+                            {payingMentor === b.id ? (
+                              <Loader2 size={14} className="animate-spin" />
+                            ) : (
+                              <Banknote size={14} />
+                            )}
+                            {payingMentor === b.id ? '...' : 'Trả mentor'}
+                          </button>
+                        ) : b.mentorPaid ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-700">
+                            <CheckCircle size={12} />
+                            Đã trả
+                          </span>
+                        ) : b.status === 'cancelled' ? (
+                          <span className="text-xs text-gray-400">—</span>
+                        ) : (
+                          <span className="text-xs text-gray-400">Chưa hoàn thành</span>
+                        )}
                       </td>
                     </tr>
                   ))

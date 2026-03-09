@@ -33,7 +33,7 @@ function PaymentSuccessContent() {
   const redirectPath = isVipUpgrade
     ? '/profile'
     : isMentorPayment
-    ? '/mentor/dashboard'
+    ? '/customer/mentor-bookings'
     : '/customer/bookings';
 
   const callConfirm = useCallback(async () => {

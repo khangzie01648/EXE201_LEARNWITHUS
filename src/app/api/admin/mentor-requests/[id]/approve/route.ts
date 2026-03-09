@@ -1,9 +1,10 @@
 // PATCH /api/admin/mentor-requests/[id]/approve - Approve mentor request (Admin only)
-// Sets user.role = Mentor
+// Sets user.role = Mentor and creates a MentorProfile
 
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb, COLLECTIONS } from '@/lib/firebase/admin';
 import { verifyToken } from '@/lib/utils';
+import { generateId } from '@/lib/firebase/firestore';
 import { FieldValue } from 'firebase-admin/firestore';
 import type { ApiResponse } from '@/types';
 import { UserRole } from '@/types';
@@ -51,7 +52,7 @@ export async function PATCH(
       );
     }
 
-    const mentorRequest = requestDoc.data() as { userId?: string; email: string; status: string };
+    const mentorRequest = requestDoc.data() as Record<string, unknown>;
     if (mentorRequest.status !== 'pending') {
       return NextResponse.json<ApiResponse<null>>(
         { data: null, message: 'Yêu cầu này đã được xử lý', statusCode: 400 },
@@ -59,13 +60,12 @@ export async function PATCH(
       );
     }
 
-    let userId: string | null = mentorRequest.userId ?? null;
+    let userId: string | null = (mentorRequest.userId as string) ?? null;
 
-    // If no userId (legacy request), find user by email
     if (!userId) {
       const usersSnapshot = await adminDb
         .collection(COLLECTIONS.users)
-        .where('email', '==', mentorRequest.email.toLowerCase())
+        .where('email', '==', (mentorRequest.email as string).toLowerCase())
         .limit(1)
         .get();
 
@@ -73,7 +73,7 @@ export async function PATCH(
         return NextResponse.json<ApiResponse<null>>(
           {
             data: null,
-            message: 'Không tìm thấy tài khoản với email này. Người dùng cần đăng ký trước khi được duyệt làm Mentor.',
+            message: 'Không tìm thấy tài khoản với email này. Người dùng cần đăng ký trước.',
             statusCode: 400,
           },
           { status: 400 }
@@ -83,6 +83,45 @@ export async function PATCH(
     }
 
     const now = FieldValue.serverTimestamp();
+
+    // Get user info for profile
+    const userDoc = await adminDb.collection(COLLECTIONS.users).doc(userId).get();
+    const userData = userDoc.exists ? userDoc.data() : {};
+
+    // Parse availability string into array
+    const availabilityStr = (mentorRequest.availability as string) || '';
+    const availabilityArr = availabilityStr
+      ? availabilityStr.split(',').map((s: string) => s.trim()).filter(Boolean)
+      : [];
+
+    // Create mentor profile
+    const profileId = generateId();
+    const pricePerSession = (mentorRequest.pricePerSession as number) || 150000;
+
+    await adminDb.collection(COLLECTIONS.mentorProfiles).doc(profileId).set({
+      id: profileId,
+      userId,
+      fullName: (mentorRequest.fullName as string) || (userData?.fullName as string) || '',
+      email: (mentorRequest.email as string) || (userData?.email as string) || '',
+      phone: (mentorRequest.phone as string) || (userData?.phone as string) || '',
+      subject: (mentorRequest.subject as string) || '',
+      subjects: [(mentorRequest.subject as string) || ''].filter(Boolean),
+      experience: (mentorRequest.experience as string) || '',
+      availability: availabilityArr,
+      pricePerSession,
+      bio: (mentorRequest.bio as string) || (mentorRequest.goal as string) || '',
+      avatarUrl: (userData?.avatarUrl as string) || '',
+      company: '',
+      university: '',
+      title: '',
+      rating: 0,
+      reviewCount: 0,
+      sessionCount: 0,
+      menteeCount: 0,
+      isActive: true,
+      createdAt: now,
+      updatedAt: now,
+    });
 
     // Update user role to Mentor
     await adminDb.collection(COLLECTIONS.users).doc(userId).update({
@@ -98,8 +137,8 @@ export async function PATCH(
       updatedAt: now,
     });
 
-    return NextResponse.json<ApiResponse<{ userId: string }>>(
-      { data: { userId }, message: 'Đã duyệt yêu cầu Mentor thành công', statusCode: 200 },
+    return NextResponse.json<ApiResponse<{ userId: string; profileId: string }>>(
+      { data: { userId, profileId }, message: 'Đã duyệt yêu cầu Mentor thành công', statusCode: 200 },
       { status: 200 }
     );
   } catch (error) {
