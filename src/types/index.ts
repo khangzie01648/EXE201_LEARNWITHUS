@@ -423,6 +423,8 @@ export interface MentorRequest extends BaseEntity {
   pricePerSession?: number;
   bio?: string;
   goal: string;
+  bankName?: string;
+  bankAccountNumber?: string;
   status: MentorRequestStatus;
   approvedBy?: string;
   approvedAt?: Date;
@@ -444,6 +446,8 @@ export interface MentorProfile extends BaseEntity {
   company?: string;
   university?: string;
   title?: string;
+  bankName?: string;
+  bankAccountNumber?: string;
   rating: number;
   reviewCount: number;
   sessionCount: number;

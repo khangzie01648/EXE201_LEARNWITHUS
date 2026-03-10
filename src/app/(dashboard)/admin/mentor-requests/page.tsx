@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { DashboardHeader } from '@/components/dashboard';
 import { Loading } from '@/components/shared';
-import { CheckCircle, XCircle, RefreshCcw } from 'lucide-react';
+import { RefreshCcw } from 'lucide-react';
 
 interface MentorRequestDto {
   id: string;
@@ -17,6 +17,8 @@ interface MentorRequestDto {
   pricePerSession?: number;
   bio?: string;
   goal: string;
+  bankName?: string;
+  bankAccountNumber?: string;
   status: string;
   createdAt: string;
 }
@@ -141,32 +143,38 @@ export default function AdminMentorRequestsPage() {
       {loading ? (
         <Loading />
       ) : (
-        <div className="mt-6 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
-          <table className="w-full">
+        <div className="mt-6 overflow-x-auto rounded-2xl border border-gray-100 bg-white shadow-sm">
+          <table className="w-full min-w-[1000px] table-fixed">
             <thead className="border-b border-gray-100 bg-gray-50">
               <tr>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                <th className="w-[140px] shrink-0 px-4 py-4 text-left text-sm font-semibold text-gray-700 whitespace-nowrap">
                   Người đăng ký
                 </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                <th className="w-[160px] shrink-0 px-4 py-4 text-left text-sm font-semibold text-gray-700 whitespace-nowrap">
                   Email
                 </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                <th className="w-[120px] shrink-0 px-4 py-4 text-left text-sm font-semibold text-gray-700 whitespace-nowrap">
                   Môn học
                 </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                <th className="w-[100px] shrink-0 px-4 py-4 text-left text-sm font-semibold text-gray-700 whitespace-nowrap">
                   Kinh nghiệm
                 </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                <th className="w-[100px] shrink-0 px-4 py-4 text-left text-sm font-semibold text-gray-700 whitespace-nowrap">
                   Giá/buổi
                 </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                <th className="w-[120px] shrink-0 px-4 py-4 text-left text-sm font-semibold text-gray-700 whitespace-nowrap">
+                  Ngân hàng
+                </th>
+                <th className="w-[110px] shrink-0 px-4 py-4 text-left text-sm font-semibold text-gray-700 whitespace-nowrap">
+                  Số TK
+                </th>
+                <th className="w-[90px] shrink-0 px-4 py-4 text-left text-sm font-semibold text-gray-700 whitespace-nowrap">
                   Ngày gửi
                 </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                <th className="w-[100px] shrink-0 px-4 py-4 text-left text-sm font-semibold text-gray-700 whitespace-nowrap">
                   Trạng thái
                 </th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
+                <th className="w-[140px] shrink-0 px-4 py-4 text-right text-sm font-semibold text-gray-700 whitespace-nowrap">
                   Thao tác
                 </th>
               </tr>
@@ -174,30 +182,42 @@ export default function AdminMentorRequestsPage() {
             <tbody className="divide-y divide-gray-50">
               {requests.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan={10} className="px-4 py-12 text-center text-gray-500">
                     Chưa có yêu cầu Mentor nào
                   </td>
                 </tr>
               ) : (
                 requests.map((req) => (
                   <tr key={req.id} className="hover:bg-gray-50/50">
-                    <td className="px-6 py-4 text-sm font-medium text-gray-800">
+                    <td className="px-4 py-4 text-sm font-medium text-gray-800 whitespace-nowrap overflow-hidden text-ellipsis" title={req.fullName}>
                       {req.fullName}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{req.email}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{req.subject}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{req.experience || '—'}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
+                    <td className="px-4 py-4 text-sm text-gray-600 whitespace-nowrap overflow-hidden text-ellipsis" title={req.email}>
+                      {req.email}
+                    </td>
+                    <td className="px-4 py-4 text-sm text-gray-600 whitespace-nowrap overflow-hidden text-ellipsis" title={req.subject}>
+                      {req.subject}
+                    </td>
+                    <td className="px-4 py-4 text-sm text-gray-600 whitespace-nowrap overflow-hidden text-ellipsis" title={req.experience}>
+                      {req.experience || '—'}
+                    </td>
+                    <td className="px-4 py-4 text-sm text-gray-600 whitespace-nowrap">
                       {req.pricePerSession
                         ? new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(req.pricePerSession)
                         : '—'}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
+                    <td className="px-4 py-4 text-sm text-gray-600 whitespace-nowrap overflow-hidden text-ellipsis" title={req.bankName}>
+                      {req.bankName || '—'}
+                    </td>
+                    <td className="px-4 py-4 text-sm font-mono text-gray-600 whitespace-nowrap overflow-hidden text-ellipsis" title={req.bankAccountNumber}>
+                      {req.bankAccountNumber || '—'}
+                    </td>
+                    <td className="px-4 py-4 text-sm text-gray-600 whitespace-nowrap">
                       {formatDate(req.createdAt)}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-4 whitespace-nowrap align-middle">
                       <span
-                        className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${
+                        className={`inline-flex rounded-full px-3 py-1 text-xs font-medium whitespace-nowrap ${
                           req.status === 'pending'
                             ? 'bg-amber-100 text-amber-700'
                             : req.status === 'approved'
@@ -212,26 +232,25 @@ export default function AdminMentorRequestsPage() {
                             : 'Đã từ chối'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      {req.status === 'pending' && (
-                        <div className="flex justify-end gap-2">
-                          <button
-                            onClick={() => handleApprove(req.id)}
-                            disabled={actionLoading === req.id}
-                            className="flex items-center gap-1.5 rounded-lg bg-emerald-100 px-3 py-1.5 text-sm font-medium text-emerald-700 hover:bg-emerald-200 disabled:opacity-50"
-                          >
-                            <CheckCircle size={16} />
-                            Duyệt
-                          </button>
-                          <button
-                            onClick={() => handleDeny(req.id)}
-                            disabled={actionLoading === req.id}
-                            className="flex items-center gap-1.5 rounded-lg bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-200 disabled:opacity-50"
-                          >
-                            <XCircle size={16} />
-                            Từ chối
-                          </button>
-                        </div>
+                    <td className="px-4 py-4 text-right whitespace-nowrap align-middle">
+                      {req.status === 'pending' ? (
+                        <select
+                          value=""
+                          onChange={(e) => {
+                            const action = e.target.value;
+                            e.target.value = '';
+                            if (action === 'approve') handleApprove(req.id);
+                            else if (action === 'deny') handleDeny(req.id);
+                          }}
+                          disabled={actionLoading === req.id}
+                          className="min-w-[120px] rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-slate-500 disabled:opacity-50"
+                        >
+                          <option value="">Chọn thao tác</option>
+                          <option value="approve">Duyệt</option>
+                          <option value="deny">Từ chối</option>
+                        </select>
+                      ) : (
+                        <span className="text-sm text-gray-400">—</span>
                       )}
                     </td>
                   </tr>

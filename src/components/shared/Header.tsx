@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Crown, GraduationCap, LogOut, Menu, User, X, BookOpen, Users, Shield } from 'lucide-react';
+import { Crown, GraduationCap, LogOut, Menu, User, X, BookOpen, Users, Shield, CalendarDays } from 'lucide-react';
 
 const baseNavLinks = [
   { href: '/', label: 'Trang chủ' },
@@ -226,6 +226,14 @@ export default function Header() {
                         <Users size={18} />
                         Không gian học
                       </Link>
+                      <Link
+                        href="/schedule"
+                        onClick={() => setIsAvatarOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-slate-50 hover:text-slate-700 transition-colors"
+                      >
+                        <CalendarDays size={18} />
+                        Lịch học
+                      </Link>
                       {userInfo.role === 'Mentor' ? (
                         <Link
                           href="/mentor/dashboard"
@@ -364,8 +372,16 @@ export default function Header() {
                     className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-slate-50 hover:text-slate-700 rounded-lg"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    <BookOpen size={18} />
+                    <Users size={18} />
                     Không gian học
+                  </Link>
+                  <Link
+                    href="/schedule"
+                    className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-slate-50 hover:text-slate-700 rounded-lg"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <CalendarDays size={18} />
+                    Lịch học
                   </Link>
                   {!isVip && (
                     <Link

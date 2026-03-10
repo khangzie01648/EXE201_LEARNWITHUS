@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { fullName, email, phone, subject, experience, availability, pricePerSession, bio, goal } = body;
+    const { fullName, email, phone, subject, experience, availability, pricePerSession, bio, goal, bankName, bankAccountNumber } = body;
 
     if (!fullName?.trim()) {
       return NextResponse.json<ApiResponse<null>>(
@@ -45,6 +45,12 @@ export async function POST(request: NextRequest) {
     if (!subject?.trim()) {
       return NextResponse.json<ApiResponse<null>>(
         { data: null, message: 'Vui lòng nhập môn học quan tâm', statusCode: 400 },
+        { status: 400 }
+      );
+    }
+    if (!bankName?.trim() || !bankAccountNumber?.trim()) {
+      return NextResponse.json<ApiResponse<null>>(
+        { data: null, message: 'Vui lòng điền tên ngân hàng và số tài khoản để nhận thanh toán', statusCode: 400 },
         { status: 400 }
       );
     }
@@ -92,6 +98,8 @@ export async function POST(request: NextRequest) {
       pricePerSession: price,
       bio: bio?.trim() || '',
       goal: goal?.trim() || bio?.trim() || '',
+      bankName: bankName.trim(),
+      bankAccountNumber: bankAccountNumber.trim(),
       status: 'pending',
       createdAt: now,
       updatedAt: now,

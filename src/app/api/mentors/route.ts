@@ -132,6 +132,7 @@ export async function PUT(request: NextRequest) {
     const allowedFields = [
       'fullName', 'phone', 'subject', 'subjects', 'experience',
       'availability', 'pricePerSession', 'bio', 'company', 'university', 'title',
+      'bankName', 'bankAccountNumber',
     ];
 
     const updates: Record<string, unknown> = { updatedAt: FieldValue.serverTimestamp() };

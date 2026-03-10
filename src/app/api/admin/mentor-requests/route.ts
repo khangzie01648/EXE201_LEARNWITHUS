@@ -17,6 +17,8 @@ export interface MentorRequestDto {
   pricePerSession?: number;
   bio?: string;
   goal: string;
+  bankName?: string;
+  bankAccountNumber?: string;
   status: string;
   createdAt: Date;
 }
@@ -77,6 +79,8 @@ export async function GET(request: NextRequest) {
         pricePerSession: d.pricePerSession || 0,
         bio: d.bio || '',
         goal: d.goal || '',
+        bankName: d.bankName || '',
+        bankAccountNumber: d.bankAccountNumber || '',
         status: d.status,
         createdAt,
       };

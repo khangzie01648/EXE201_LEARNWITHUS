@@ -45,7 +45,7 @@ export default function Sidebar({ items, title = 'StudyHub Admin' }: SidebarProp
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
 
   return (
-    <div className="flex flex-col h-screen w-64 bg-[#1F2B6C] shadow-lg">
+    <div className="flex flex-col h-screen w-64 bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 shadow-lg">
       {/* Logo */}
       <div className="flex flex-col items-center py-6">
         <div className="mb-2 flex h-14 w-14 items-center justify-center rounded-xl bg-white/10">
@@ -65,8 +65,8 @@ export default function Sidebar({ items, title = 'StudyHub Admin' }: SidebarProp
                     onClick={() => toggleDropdown(item.heading)}
                     className={`flex cursor-pointer items-center justify-between rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
                       isActive(item.href)
-                        ? 'bg-white font-bold text-[#1F2B6C]'
-                        : 'text-white hover:bg-white hover:text-[#1F2B6C]'
+                        ? 'bg-white font-bold text-slate-900'
+                        : 'text-white hover:bg-white/10'
                     }`}
                   >
                     <div className="flex items-center">
@@ -109,8 +109,8 @@ export default function Sidebar({ items, title = 'StudyHub Admin' }: SidebarProp
                   <div
                     className={`flex cursor-pointer items-center rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
                       isActive(item.href)
-                        ? 'bg-white font-bold text-[#1F2B6C]'
-                        : 'text-white hover:bg-white hover:text-[#1F2B6C]'
+                        ? 'bg-white font-bold text-slate-900'
+                        : 'text-white hover:bg-white/10'
                     }`}
                   >
                     <div className="mr-3 text-lg">
@@ -129,7 +129,7 @@ export default function Sidebar({ items, title = 'StudyHub Admin' }: SidebarProp
       <div className="px-4 py-6">
         <button
           onClick={handleLogout}
-          className="flex w-full items-center rounded-lg px-4 py-2 text-sm font-medium text-[#1F2B6C] bg-white hover:bg-gray-100 transition-colors"
+          className="flex w-full items-center rounded-lg px-4 py-2 text-sm font-medium text-slate-900 bg-white hover:bg-gray-100 transition-colors"
         >
           <LogOut size={18} className="mr-3" />
           Đăng xuất

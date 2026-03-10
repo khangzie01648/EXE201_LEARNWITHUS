@@ -111,6 +111,8 @@ export async function PATCH(
       pricePerSession,
       bio: (mentorRequest.bio as string) || (mentorRequest.goal as string) || '',
       avatarUrl: (userData?.avatarUrl as string) || '',
+      bankName: (mentorRequest.bankName as string) || '',
+      bankAccountNumber: (mentorRequest.bankAccountNumber as string) || '',
       company: '',
       university: '',
       title: '',

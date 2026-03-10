@@ -62,6 +62,8 @@ export default function MentorRegisterPage() {
     availability: '',
     bio: '',
     pricePerSession: '',
+    bankName: '',
+    bankAccountNumber: '',
   });
   const [selectedDay, setSelectedDay] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
@@ -101,6 +103,10 @@ export default function MentorRegisterPage() {
       setError('Vui lòng điền đầy đủ thông tin bắt buộc');
       return;
     }
+    if (!formData.bankName.trim() || !formData.bankAccountNumber.trim()) {
+      setError('Vui lòng điền tên ngân hàng và số tài khoản để nhận thanh toán');
+      return;
+    }
     if (formData.subject === 'Khác' && !formData.subjectOther.trim()) {
       setError('Vui lòng nhập môn học / lĩnh vực khi chọn Khác');
       return;
@@ -130,6 +136,8 @@ export default function MentorRegisterPage() {
           pricePerSession: parsePriceVN(formData.pricePerSession),
           bio: formData.bio.trim(),
           goal: formData.bio.trim() || formData.experience.trim() || '',
+          bankName: formData.bankName.trim(),
+          bankAccountNumber: formData.bankAccountNumber.trim(),
         }),
       });
       const data = await res.json();
@@ -405,6 +413,33 @@ export default function MentorRegisterPage() {
                     placeholder="VD: 150.000"
                     className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
                   />
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="block mb-1.5 text-sm font-medium text-gray-700">
+                      Tên ngân hàng <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.bankName}
+                      onChange={(e) => setFormData({ ...formData, bankName: e.target.value })}
+                      className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
+                      placeholder="VD: Vietcombank, Techcombank"
+                    />
+                  </div>
+                  <div>
+                    <label className="block mb-1.5 text-sm font-medium text-gray-700">
+                      Số tài khoản <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={formData.bankAccountNumber}
+                      onChange={(e) => setFormData({ ...formData, bankAccountNumber: e.target.value.replace(/\D/g, '') })}
+                      className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
+                      placeholder="VD: 1234567890"
+                    />
+                  </div>
                 </div>
                 <div>
                   <label className="block mb-1.5 text-sm font-medium text-gray-700">

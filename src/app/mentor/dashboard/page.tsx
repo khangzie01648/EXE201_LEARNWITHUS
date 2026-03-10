@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { Header, Footer } from '@/components/shared';
 import {
   Calendar,
+  CalendarDays,
+  ChevronLeft,
   DollarSign,
   Star,
   Users,
@@ -39,7 +41,7 @@ interface BookingDto {
   mentorPaid?: boolean;
 }
 
-type Tab = 'overview' | 'bookings' | 'profile';
+type Tab = 'overview' | 'schedule' | 'bookings' | 'profile';
 
 export default function MentorDashboardPage() {
   const router = useRouter();
@@ -62,9 +64,19 @@ export default function MentorDashboardPage() {
     company: '',
     university: '',
     title: '',
+    bankName: '',
+    bankAccountNumber: '',
   });
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileMsg, setProfileMsg] = useState('');
+  const [scheduleWeek, setScheduleWeek] = useState(() => {
+    const d = new Date();
+    const day = d.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
+    d.setDate(d.getDate() + diff);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  });
 
   const getToken = () => typeof window !== 'undefined' ? localStorage.getItem('token') : null;
 
@@ -128,6 +140,8 @@ export default function MentorDashboardPage() {
           company: p.company || '',
           university: p.university || '',
           title: p.title || '',
+          bankName: p.bankName || '',
+          bankAccountNumber: p.bankAccountNumber || '',
         });
       }
     } catch (err) { console.error(err); }
@@ -174,6 +188,8 @@ export default function MentorDashboardPage() {
           company: profileForm.company,
           university: profileForm.university,
           title: profileForm.title,
+          bankName: profileForm.bankName,
+          bankAccountNumber: profileForm.bankAccountNumber,
         }),
       });
       const data = await res.json();
@@ -188,11 +204,15 @@ export default function MentorDashboardPage() {
     finally { setProfileSaving(false); }
   };
 
-  // Computed stats
-  const totalEarnings = bookings
-    .filter((b) => b.status === 'paid' || b.status === 'completed')
-    .reduce((sum, b) => sum + (b.amount || 0), 0);
-  const mentorEarnings = Math.round(totalEarnings * 0.8);
+  // Computed stats - distinguish received vs awaiting admin payment
+  const completedBookings = bookings.filter((b) => b.status === 'completed');
+  const receivedFromAdmin = completedBookings
+    .filter((b) => b.mentorPaid)
+    .reduce((sum, b) => sum + Math.round((b.amount || 0) * 0.8), 0);
+  const awaitingAdminPayment = completedBookings
+    .filter((b) => !b.mentorPaid)
+    .reduce((sum, b) => sum + Math.round((b.amount || 0) * 0.8), 0);
+  const mentorEarningsTotal = receivedFromAdmin + awaitingAdminPayment;
   const pendingBookings = bookings.filter((b) => ['pending', 'paid', 'confirmed'].includes(b.status));
   const upcomingBookings = bookings
     .filter((b) => ['confirmed', 'paid'].includes(b.status) && new Date(b.scheduledAt) > new Date())
@@ -227,18 +247,26 @@ export default function MentorDashboardPage() {
             <h1 className="text-2xl font-bold text-gray-800">Dashboard Mentor</h1>
             <p className="mt-1 text-gray-600">Quản lý lịch tư vấn và thu nhập</p>
           </div>
-          <div className="flex gap-2">
-            {(['overview', 'bookings', 'profile'] as Tab[]).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-                  activeTab === tab ? 'bg-slate-800 text-white' : 'bg-white text-slate-600 hover:bg-slate-100'
-                }`}
-              >
-                {tab === 'overview' ? 'Tổng quan' : tab === 'bookings' ? 'Đơn đặt lịch' : 'Hồ sơ'}
-              </button>
-            ))}
+          <div className="flex flex-wrap gap-2">
+            {(['overview', 'schedule', 'bookings', 'profile'] as Tab[]).map((tab) => {
+              const labels: Record<Tab, string> = {
+                overview: 'Tổng quan',
+                schedule: 'Lịch dạy',
+                bookings: 'Đơn đặt lịch',
+                profile: 'Hồ sơ',
+              };
+              return (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
+                    activeTab === tab ? 'bg-slate-800 text-white' : 'bg-white text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  {labels[tab]}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -257,8 +285,12 @@ export default function MentorDashboardPage() {
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100">
                   <DollarSign size={24} className="text-emerald-600" />
                 </div>
-                <p className="mt-4 text-2xl font-bold text-gray-800">{formatPrice(mentorEarnings)}</p>
-                <p className="text-sm text-gray-500">Thu nhập (80%)</p>
+                <p className="mt-4 text-2xl font-bold text-gray-800">{formatPrice(mentorEarningsTotal)}</p>
+                <p className="text-sm text-gray-500">Tổng thu nhập (80%)</p>
+                <div className="mt-2 space-y-1 text-xs text-gray-600">
+                  <p>Đã nhận: {formatPrice(receivedFromAdmin)}</p>
+                  <p>Chờ admin thanh toán: {formatPrice(awaitingAdminPayment)}</p>
+                </div>
               </div>
               <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100">
@@ -473,6 +505,127 @@ export default function MentorDashboardPage() {
           </div>
         )}
 
+        {/* === SCHEDULE TAB === */}
+        {activeTab === 'schedule' && (() => {
+          const SDAY_LABELS = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'CN'];
+          const SHOURS = Array.from({ length: 15 }, (_, i) => i + 7);
+          const sCols: Record<string, string> = {
+            pending: 'border-amber-300 bg-amber-50 text-amber-800',
+            paid: 'border-emerald-300 bg-emerald-50 text-emerald-800',
+            confirmed: 'border-blue-300 bg-blue-50 text-blue-800',
+            completed: 'border-slate-300 bg-slate-50 text-slate-700',
+          };
+          const sLbls: Record<string, string> = {
+            pending: 'Chờ TT', paid: 'Đã TT', confirmed: 'Đã xác nhận', completed: 'Hoàn thành',
+          };
+          const fmtRange = (mon: Date) => {
+            const sun = new Date(mon);
+            sun.setDate(sun.getDate() + 6);
+            const f = (d: Date) => d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+            return `${f(mon)} – ${f(sun)}`;
+          };
+          const getDayDate = (mon: Date, idx: number) => {
+            const d = new Date(mon);
+            d.setDate(d.getDate() + idx);
+            return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+          };
+          const isTodayCheck = (mon: Date, idx: number) => {
+            const d = new Date(mon);
+            d.setDate(d.getDate() + idx);
+            const t = new Date();
+            return d.getFullYear() === t.getFullYear() && d.getMonth() === t.getMonth() && d.getDate() === t.getDate();
+          };
+          const weekBookings = bookings.filter((b) => {
+            if (b.status === 'cancelled') return false;
+            const d = new Date(b.scheduledAt);
+            const end = new Date(scheduleWeek.getTime() + 7 * 24 * 60 * 60 * 1000);
+            return d >= scheduleWeek && d < end;
+          });
+          const getSlot = (dayIdx: number, hour: number) =>
+            weekBookings.filter((b) => {
+              const d = new Date(b.scheduledAt);
+              const mapped = d.getDay() === 0 ? 6 : d.getDay() - 1;
+              return mapped === dayIdx && d.getHours() === hour;
+            });
+
+          return (
+            <div>
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setScheduleWeek((p) => { const d = new Date(p); d.setDate(d.getDate() - 7); return d; })}
+                    className="rounded-lg border border-gray-200 p-2 hover:bg-gray-100"
+                  >
+                    <ChevronLeft size={18} />
+                  </button>
+                  <button
+                    onClick={() => { const d = new Date(); const day = d.getDay(); const diff = day === 0 ? -6 : 1 - day; d.setDate(d.getDate() + diff); d.setHours(0,0,0,0); setScheduleWeek(d); }}
+                    className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
+                  >
+                    Tuần hiện tại
+                  </button>
+                  <button
+                    onClick={() => setScheduleWeek((p) => { const d = new Date(p); d.setDate(d.getDate() + 7); return d; })}
+                    className="rounded-lg border border-gray-200 p-2 hover:bg-gray-100"
+                  >
+                    <ChevronRight size={18} />
+                  </button>
+                </div>
+                <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                  <CalendarDays size={18} className="text-slate-500" />
+                  {fmtRange(scheduleWeek)}
+                </div>
+              </div>
+
+              <div className="overflow-x-auto rounded-2xl border border-gray-100 bg-white shadow-sm">
+                <table className="w-full min-w-[800px] border-collapse">
+                  <thead>
+                    <tr>
+                      <th className="sticky left-0 z-10 w-[72px] border-b border-r border-gray-100 bg-gray-50 px-2 py-3 text-center text-xs font-semibold text-gray-500">Giờ</th>
+                      {SDAY_LABELS.map((label, i) => (
+                        <th key={label} className={`border-b border-r border-gray-100 px-2 py-3 text-center text-xs font-semibold last:border-r-0 ${isTodayCheck(scheduleWeek, i) ? 'bg-slate-800 text-white' : 'bg-gray-50 text-gray-600'}`}>
+                          <div>{label}</div>
+                          <div className={`text-[11px] font-normal ${isTodayCheck(scheduleWeek, i) ? 'text-slate-300' : 'text-gray-400'}`}>{getDayDate(scheduleWeek, i)}</div>
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {SHOURS.map((hour) => (
+                      <tr key={hour}>
+                        <td className="sticky left-0 z-10 border-b border-r border-gray-100 bg-gray-50 px-2 py-1 text-center text-xs font-medium text-gray-500">{`${hour}:00`}</td>
+                        {SDAY_LABELS.map((_, dayIdx) => {
+                          const items = getSlot(dayIdx, hour);
+                          return (
+                            <td key={dayIdx} className={`relative border-b border-r border-gray-100 p-1 align-top last:border-r-0 ${isTodayCheck(scheduleWeek, dayIdx) ? 'bg-slate-50/40' : ''}`} style={{ minHeight: 56, height: 56 }}>
+                              {items.map((b) => (
+                                <div key={b.id} className={`mb-1 rounded-lg border-l-[3px] px-2 py-1.5 ${sCols[b.status] || 'border-gray-200 bg-gray-50'}`} title={`${b.topic} — ${b.userName || '—'} (${sLbls[b.status] || b.status})`}>
+                                  <div className="flex items-center gap-1">
+                                    {b.type === 'session' ? <BookOpen size={12} className="shrink-0" /> : <MessageSquare size={12} className="shrink-0" />}
+                                    <span className="truncate text-xs font-semibold">{b.topic}</span>
+                                  </div>
+                                  <p className="mt-0.5 truncate text-[11px] opacity-75">{b.userName || '—'}</p>
+                                </div>
+                              ))}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-gray-600">
+                <span className="flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded border-l-[3px] border-amber-300 bg-amber-50" /> Chờ thanh toán</span>
+                <span className="flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded border-l-[3px] border-emerald-300 bg-emerald-50" /> Đã thanh toán</span>
+                <span className="flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded border-l-[3px] border-blue-300 bg-blue-50" /> Đã xác nhận</span>
+                <span className="flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded border-l-[3px] border-slate-300 bg-slate-50" /> Hoàn thành</span>
+              </div>
+            </div>
+          );
+        })()}
+
         {/* === PROFILE TAB === */}
         {activeTab === 'profile' && (
           <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
@@ -519,6 +672,8 @@ export default function MentorDashboardPage() {
                 { key: 'experience', label: 'Kinh nghiệm' },
                 { key: 'availability', label: 'Lịch rảnh (phân cách bởi dấu phẩy)' },
                 { key: 'pricePerSession', label: 'Giá / buổi (VNĐ)' },
+                { key: 'bankName', label: 'Tên ngân hàng' },
+                { key: 'bankAccountNumber', label: 'Số tài khoản' },
                 { key: 'title', label: 'Chức danh' },
                 { key: 'company', label: 'Công ty / Tổ chức' },
                 { key: 'university', label: 'Trường học' },
