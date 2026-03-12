@@ -311,8 +311,8 @@ export default function MentorDashboardPage() {
   if (!authorized) return null;
 
   const statusLabels: Record<string, string> = {
-    pending: 'Chờ thanh toán', confirmed: 'Đã xác nhận', paid: 'Đã thanh toán',
-    completed: 'Hoàn thành', cancelled: 'Đã hủy',
+    pending: 'Chờ duyệt', confirmed: 'Đã chấp nhận', paid: 'Đã thanh toán',
+    completed: 'Hoàn thành', cancelled: 'Đã hủy/từ chối',
   };
   const statusColors: Record<string, string> = {
     pending: 'bg-amber-100 text-amber-700', confirmed: 'bg-blue-100 text-blue-700',
@@ -449,22 +449,33 @@ export default function MentorDashboardPage() {
                         </p>
                       </div>
                       <div className="flex gap-2">
-                        {b.status === 'paid' && (
+                        {b.status === 'pending' && (
                           <button
                             onClick={() => handleAction(b.id, 'confirmed')}
                             disabled={actionLoading === b.id}
                             className="rounded-lg bg-emerald-100 px-3 py-1.5 text-sm font-medium text-emerald-700 hover:bg-emerald-200 disabled:opacity-50"
                           >
+                            {actionLoading === b.id ? '...' : 'Chấp nhận'}
+                          </button>
+                        )}
+                        {b.status === 'paid' && (
+                          <button
+                            onClick={() => handleAction(b.id, 'confirmed')}
+                            disabled={actionLoading === b.id}
+                            className="rounded-lg bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-200 disabled:opacity-50"
+                          >
                             {actionLoading === b.id ? '...' : 'Xác nhận'}
                           </button>
                         )}
-                        <button
-                          onClick={() => handleAction(b.id, 'cancelled')}
-                          disabled={actionLoading === b.id}
-                          className="rounded-lg bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-200 disabled:opacity-50"
-                        >
-                          Từ chối
-                        </button>
+                        {(b.status === 'pending' || b.status === 'paid') && (
+                          <button
+                            onClick={() => handleAction(b.id, 'cancelled')}
+                            disabled={actionLoading === b.id}
+                            className="rounded-lg bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-200 disabled:opacity-50"
+                          >
+                            Từ chối
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -620,12 +631,22 @@ export default function MentorDashboardPage() {
                         </td>
                         <td className="px-6 py-4 text-right">
                           <div className="flex justify-end gap-1">
-                            {b.status === 'paid' && (
+                            {b.status === 'pending' && (
                               <button
                                 onClick={() => handleAction(b.id, 'confirmed')}
                                 disabled={actionLoading === b.id}
                                 className="rounded-lg p-1.5 text-emerald-600 hover:bg-emerald-50 disabled:opacity-50"
-                                title="Xác nhận"
+                                title="Chấp nhận yêu cầu"
+                              >
+                                <CheckCircle size={18} />
+                              </button>
+                            )}
+                            {b.status === 'paid' && (
+                              <button
+                                onClick={() => handleAction(b.id, 'confirmed')}
+                                disabled={actionLoading === b.id}
+                                className="rounded-lg p-1.5 text-blue-600 hover:bg-blue-50 disabled:opacity-50"
+                                title="Xác nhận đã thanh toán"
                               >
                                 <CheckCircle size={18} />
                               </button>
@@ -681,7 +702,7 @@ export default function MentorDashboardPage() {
             completed: 'border-slate-300 bg-slate-50 text-slate-700',
           };
           const sLbls: Record<string, string> = {
-            pending: 'Chờ TT', paid: 'Đã TT', confirmed: 'Đã xác nhận', completed: 'Hoàn thành',
+            pending: 'Chờ duyệt', paid: 'Đã TT', confirmed: 'Đã chấp nhận', completed: 'Hoàn thành',
           };
           const fmtRange = (mon: Date) => {
             const sun = new Date(mon);

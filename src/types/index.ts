@@ -525,6 +525,20 @@ export interface MentorBooking extends BaseEntity {
   isFreeVipSession?: boolean;
 }
 
+// Mentor Course (khóa học do mentor tạo)
+export interface MentorCourse extends BaseEntity {
+  mentorId: string;
+  mentorName?: string;
+  title: string;
+  description: string;
+  subject: string;
+  price: number;
+  duration: string;       // e.g. "8 buổi", "1 tháng"
+  maxStudents?: number;
+  level: 'beginner' | 'intermediate' | 'advanced';
+  isActive: boolean;
+}
+
 // ============================================
 // DTOs - Data Transfer Objects
 // ============================================

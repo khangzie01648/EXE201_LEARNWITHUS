@@ -52,8 +52,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
       );
     }
 
-    // Chỉ thanh toán khi status là pending
-    if (booking.status !== 'pending') {
+    // Chỉ thanh toán khi status là pending hoặc confirmed (mentor đã chấp nhận)
+    if (booking.status !== 'pending' && booking.status !== 'confirmed') {
       return NextResponse.json<ApiResponse<null>>(
         { data: null, message: 'Đơn đặt lịch đã được thanh toán hoặc đã hủy', statusCode: 400 },
         { status: 400 }
@@ -61,8 +61,27 @@ export async function POST(request: NextRequest, context: RouteContext) {
     }
 
     if (!booking.amount || booking.amount <= 0) {
+      // Fallback: lấy giá từ mentorProfile nếu booking không có amount
+      const mentorProfileSnap = await adminDb
+        .collection(COLLECTIONS.mentorProfiles)
+        .where('userId', '==', booking.mentorId)
+        .limit(1)
+        .get();
+      if (!mentorProfileSnap.empty) {
+        const mentorData = mentorProfileSnap.docs[0].data() as { pricePerSession?: number };
+        if (mentorData.pricePerSession && mentorData.pricePerSession > 0) {
+          booking.amount = mentorData.pricePerSession;
+          // Cập nhật booking với giá đúng
+          await adminDb.collection(COLLECTIONS.mentorBookings).doc(id).update({
+            amount: mentorData.pricePerSession,
+          });
+        }
+      }
+    }
+
+    if (!booking.amount || booking.amount <= 0) {
       return NextResponse.json<ApiResponse<null>>(
-        { data: null, message: 'Số tiền không hợp lệ', statusCode: 400 },
+        { data: null, message: 'Số tiền không hợp lệ. Mentor chưa cập nhật giá buổi học.', statusCode: 400 },
         { status: 400 }
       );
     }

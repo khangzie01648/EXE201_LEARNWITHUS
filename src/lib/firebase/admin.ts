@@ -145,6 +145,7 @@ export const COLLECTIONS = {
   mentorBookings: 'mentorBookings',
   mentorProfiles: 'mentorProfiles',
   mentorReviews: 'mentorReviews',
+  mentorCourses: 'mentorCourses',
   pomodoroSessions: 'pomodoroSessions',
 } as const;
 
