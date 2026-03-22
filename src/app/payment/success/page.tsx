@@ -30,11 +30,12 @@ function PaymentSuccessContent() {
   const isVipUpgrade = type === 'vip_upgrade';
   const isMentorPayment = type === 'mentor_booking' || !!mentorBookingId;
 
+  // VIP → profile; mentor booking → schedule; generic PayOS return → home
   const redirectPath = isVipUpgrade
     ? '/profile'
     : isMentorPayment
-    ? '/schedule'
-    : '/profile';
+      ? '/schedule'
+      : '/';
 
   const callConfirm = useCallback(async () => {
     setConfirmStatus('loading');
@@ -81,21 +82,21 @@ function PaymentSuccessContent() {
     callConfirm();
   }, [callConfirm]);
 
-  // Countdown only starts after payment is confirmed
+  // Countdown only after confirm — updater must stay pure (no router inside setState).
   useEffect(() => {
     if (confirmStatus !== 'success') return;
+    setCountdown(5);
     const timer = setInterval(() => {
-      setCountdown((c) => {
-        if (c <= 1) {
-          clearInterval(timer);
-          router.push(redirectPath);
-          return 0;
-        }
-        return c - 1;
-      });
+      setCountdown((c) => (c <= 1 ? 0 : c - 1));
     }, 1000);
     return () => clearInterval(timer);
-  }, [confirmStatus, router, redirectPath]);
+  }, [confirmStatus]);
+
+  // Navigate after countdown finishes (separate effect = not during state updater).
+  useEffect(() => {
+    if (confirmStatus !== 'success' || countdown > 0) return;
+    router.replace(redirectPath);
+  }, [confirmStatus, countdown, redirectPath, router]);
 
   // ── Loading state ──────────────────────────────────────────────────────────
   if (confirmStatus === 'loading') {
@@ -152,7 +153,9 @@ function PaymentSuccessContent() {
               <Crown className="text-amber-500" size={44} strokeWidth={1.5} />
             </div>
           ) : (
-            <CheckCircle className="text-green-500" size={64} strokeWidth={1.5} />
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-100">
+               <CheckCircle className="text-green-500" size={44} strokeWidth={1.5} />
+            </div>
           )}
         </div>
 
@@ -192,8 +195,8 @@ function PaymentSuccessContent() {
           {isVipUpgrade
             ? 'Xem profile VIP của tôi'
             : isMentorPayment
-            ? 'Xem lịch mentor của tôi'
-            : 'Xem đơn đặt lịch'}
+              ? 'Xem lịch mentor của tôi'
+              : 'Về trang chủ'}
         </Link>
 
         <p className="text-sm text-gray-400 mt-4">
