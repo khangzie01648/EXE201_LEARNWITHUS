@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
       .orderBy('membersCount', 'desc')
       .get();
 
-    const groups = groupsSnapshot.docs.map(doc => doc.data() as StudyGroup);
+    const groups = groupsSnapshot.docs.map(doc => ({ ...doc.data() as StudyGroup, id: doc.id }));
 
     // Get actual member counts from groupMembers (status=active)
     const membershipsSnapshot = await adminDb
