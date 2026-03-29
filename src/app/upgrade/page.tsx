@@ -130,7 +130,7 @@ export default function UpgradePage() {
             Mở khóa toàn bộ tiềm năng học tập
           </h1>
           <p className="max-w-2xl mx-auto text-gray-600">
-            VIP giúp bạn tận dụng tối đa StudyHub với mentor miễn phí, nhóm học đặc biệt và nhiều ưu đãi khác.
+            VIP giúp bạn tận dụng tối đa Learn With Us với mentor miễn phí, nhóm học đặc biệt và nhiều ưu đãi khác.
           </p>
 
           {userVipStatus?.isVip && (
